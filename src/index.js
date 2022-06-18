@@ -103,8 +103,14 @@ const convertScoreIntoDataRow = (scores) => {
                     PlayerName: player,
                     SongPack: song.pack,
                     SongName: song.song,
-                    Difficulty: diff.Difficulty,
-                    Grade: TIER_MAP[diff.Grade],
+                    Difficulty:
+                        typeof DIFF_MAP[diff.Difficulty] === "undefined"
+                            ? diff.Difficulty
+                            : DIFF_MAP[diff.Difficulty],
+                    Grade:
+                        typeof TIER_MAP[diff.Grade] === "undefined"
+                            ? diff.Grade
+                            : TIER_MAP[diff.Grade],
                     Score: diff.Score,
                     PercentDP: diff.PercentDP,
                     MaxCombo: diff.MaxCombo,
