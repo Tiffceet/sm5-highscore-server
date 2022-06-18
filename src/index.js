@@ -63,6 +63,10 @@ app.post("/submitScore", function (req, res) {
     res.send("Done !");
 });
 
+app.get("/", function (req, res) {
+    res.sendFile(path.join(path.resolve(path.dirname("")), "/serve.html"));
+});
+
 // curl localhost:3000/getScores?username=Controller
 app.get("/getScores", async function (req, res) {
     if (req.query.username) {
