@@ -1,12 +1,13 @@
 import * as xml2js from "xml2js";
 import * as fs from "fs";
+import * as cors from "cors";
 import express from "express";
 import path from "path";
 import bodyParser from "body-parser";
-import { countReset } from "console";
 
 const app = express();
 app.use(bodyParser.text({ type: "*/*" }));
+app.use(cors.default());
 
 // curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" localhost:3000/submitScore
 app.post("/submitScore", function (req, res) {
@@ -43,7 +44,7 @@ app.get("/getScores", async function (req, res) {
 
     fs.readdir(`${dirname}${path.sep}scores`, function (err, filenames) {
         if (err) {
-            onError(err);
+            console.error(err);
             return;
         }
         for (let i = 0; i < filenames.length; i++) {
