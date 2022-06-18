@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https:/cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+</head>
+<table id="myTable" class="display">
+    <thead>
+        <tr>
+            <th>DateTime</th>
+            <th>PlayerName</th>
+            <th>SongPack</th>
+            <th>SongName</th>
+            <th>Difficulty</th>
+            <th>Grade</th>
+            <th>Score</th>
+            <th>PercentDP</th>
+            <th>MaxCombo</th>
+            <th>Marvelous</th>
+            <th>Perfect</th>
+            <th>Great</th>
+            <th>Good</th>
+            <th>OK</th>
+            <th>Miss</th>
+            <th>Disqualified</th>
+            <th>Modifiers</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<body>
+</body>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "http://konishi.tk:8765/getScores",
+            success: (data) => {
+                console.log(data)
+                $('#myTable').DataTable({
+                    data: data,
+                    bPaginate: false,
+                    columns: [
+                        { data: 'DateTime' },
+                        { data: "PlayerName" },
+                        { data: "SongPack" },
+                        { data: "SongName" },
+                        { data: "Difficulty" },
+                        { data: "Grade" },
+                        { data: "Score" },
+                        { data: "PercentDP" },
+                        { data: "MaxCombo" },
+                        { data: "Marvelous" },
+                        { data: "Perfect" },
+                        { data: "Great" },
+                        { data: "Good" },
+                        { data: "OK" },
+                        { data: "Miss" },
+                        { data: "Disqualified" },
+                        { data: "Modifiers" },
+                    ]
+                });
+            }
+        });
+    });
+</script>
+
+</html>
