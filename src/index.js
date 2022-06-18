@@ -5,11 +5,40 @@ import express from "express";
 import path from "path";
 import bodyParser from "body-parser";
 
+const DIFF_MAP = {
+    Novice: "Beginner",
+    Easy: "Basic",
+    Medium: "Difficult",
+    Hard: "Expert",
+    Expert: "Challenge",
+};
+
+const TIER_MAP = {
+    Tier01: "AAA+",
+    Tier02: "AAA",
+    Tier03: "AA+",
+    Tier04: "AA",
+    Tier05: "AA-",
+    Tier06: "A+",
+    Tier07: "A",
+    Tier08: "A-",
+    Tier09: "B+",
+    Tier10: "B",
+    Tier11: "B-",
+    Tier12: "C+",
+    Tier13: "C",
+    Tier14: "C-",
+    Tier15: "D+",
+    Tier16: "D",
+    Tier17: "D",
+    Failed: "Failed"
+};
+
 const app = express();
 app.use(bodyParser.text({ type: "*/*" }));
 app.use(cors.default());
 
-// curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" localhost:3000/submitScore
+// curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" konishi.tk:8765/submitScore
 app.post("/submitScore", function (req, res) {
     // console.log(req.body);
     xml2js.parseString(req.body, (err, result) => {
@@ -55,9 +84,40 @@ app.get("/getScores", async function (req, res) {
             );
             scores = { ...scores, ...JSON.parse(content) };
         }
-        res.json(scores);
+        res.json(convertScoreIntoDataRow(scores));
     });
 });
+
+const convertScoreIntoDataRow = (scores) => {
+    let datarows = [];
+    scores = Object.entries(scores);
+    scores.forEach(([player, songs]) => {
+        songs.forEach((song) => {
+            song.diffs.forEach((diff) => {
+                datarows.push({
+                    DateTime: diff.DateTime,
+                    PlayerName: player,
+                    SongPack: song.pack,
+                    SongName: song.song,
+                    Difficulty: diff.Difficulty,
+                    Grade: TIER_MAP[diff.Grade],
+                    Score: diff.Score,
+                    PercentDP: diff.PercentDP,
+                    MaxCombo: diff.MaxCombo,
+                    Marvelous: diff.TapNoteScores.W1,
+                    Perfect: diff.TapNoteScores.W2,
+                    Great: diff.TapNoteScores.W3,
+                    Good: diff.TapNoteScores.W4,
+                    OK: -1,
+                    Miss: diff.TapNoteScores.Miss,
+                    Disqualified: diff.Disqualified,
+                    Modifiers: diff.Modifiers.join(", "),
+                });
+            });
+        });
+    });
+    return datarows;
+};
 
 const parseSong = (song_obj) => {
     let diffs = [];
@@ -107,3 +167,4 @@ const parseDiff = (diff_obj) => {
 };
 
 app.listen(8765);
+// convertScoreIntoDataRow({});
