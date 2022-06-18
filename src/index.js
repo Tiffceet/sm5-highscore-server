@@ -31,7 +31,7 @@ const TIER_MAP = {
     Tier15: "D+",
     Tier16: "D",
     Tier17: "D",
-    Failed: "Failed"
+    Failed: "Failed",
 };
 
 const app = express();
@@ -108,7 +108,7 @@ const convertScoreIntoDataRow = (scores) => {
                     Perfect: diff.TapNoteScores.W2,
                     Great: diff.TapNoteScores.W3,
                     Good: diff.TapNoteScores.W4,
-                    OK: -1,
+                    OK: diff.OK,
                     Miss: diff.TapNoteScores.Miss,
                     Disqualified: diff.Disqualified,
                     Modifiers: diff.Modifiers.join(", "),
@@ -153,6 +153,7 @@ const parseDiff = (diff_obj) => {
         },
         {}
     );
+    let OK = +top_score.HoldNoteScores[0].Held[0];
     return {
         Difficulty,
         DateTime,
@@ -163,6 +164,7 @@ const parseDiff = (diff_obj) => {
         PercentDP,
         Score,
         TapNoteScores,
+        OK,
     };
 };
 
