@@ -179,4 +179,3 @@ const parseDiff = (diff_obj) => {
 };
 
 app.listen(8765);
-// convertScoreIntoDataRow({});
