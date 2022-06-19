@@ -47,6 +47,7 @@
                 $('#myTable').DataTable({
                     data: data,
                     bPaginate: false,
+                    order: [[0, 'desc']],
                     columns: [
                         { data: 'DateTime' },
                         { data: "PlayerName" },
