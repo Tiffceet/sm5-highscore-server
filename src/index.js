@@ -4,8 +4,6 @@ import * as cors from "cors";
 import express from "express";
 import path from "path";
 import bodyParser from "body-parser";
-import { resourceLimits } from "worker_threads";
-import { resolveSoa } from "dns";
 
 const DIFF_MAP = {
     Novice: "Beginner",
@@ -33,12 +31,12 @@ const TIER_MAP = {
     Tier15: "D+",
     Tier16: "D",
     Tier17: "D",
-    Failed: "Failed",
+    Failed: "E (Failed)",
 };
 
 const app = express();
-app.use(bodyParser.text({ type: "text/plain" }));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.text({ type: "text/plain", limit: '200mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '200mb' }));
 app.use(cors.default());
 
 // curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" konishi.tk:8765/submitScore
@@ -474,7 +472,10 @@ const parseSong = (song_obj) => {
     let diffs = [];
     let [_, pack, song] = song_obj.$.Dir.split("/");
     song_obj.Steps.forEach((diff_obj) => {
-        if(typeof diff_obj.HighScoreList !== "undefined" && typeof diff_obj.HighScoreList[0].HighScore !== "undefined") {
+        if (
+            typeof diff_obj.HighScoreList !== "undefined" &&
+            typeof diff_obj.HighScoreList[0].HighScore !== "undefined"
+        ) {
             diffs.push(parseDiff(diff_obj));
         }
     });
@@ -491,7 +492,8 @@ const parseDiff = (diff_obj) => {
 
     let DateTime = top_score.DateTime[0];
     let Disqualified = top_score.Disqualified[0] == 0 ? false : true;
-    let Grade = top_score.Grade[0];
+    // let Grade = top_score.Grade[0];
+    let Grade = getDDRAGradeFromScore(+top_score.Score[0], top_score.Grade[0]);
     let MaxCombo = top_score.MaxCombo[0];
     let Modifiers = top_score.Modifiers;
     let PercentDP = top_score.PercentDP[0];
@@ -519,6 +521,40 @@ const parseDiff = (diff_obj) => {
         TapNoteScores,
         OK,
     };
+};
+
+const getDDRAGradeFromScore = (score, original_grade) => {
+    if (original_grade === "Failed") {
+        return "Failed";
+    }
+    let grade_table = {
+        Tier01: 1000000, // AAA+
+        Tier02: 990000, // AAA
+        Tier03: 950000, // AA+
+        Tier04: 900000, // AA
+        Tier05: 890000, // AA-
+        Tier06: 850000, // A+
+        Tier07: 800000, // A
+        Tier08: 790000, // A-
+        Tier09: 750000, // B+
+        Tier10: 700000, // B
+        Tier11: 690000, // B-
+        Tier12: 650000, // C+
+        Tier13: 600000, // C
+        Tier14: 590000, // C-
+        Tier15: 550000, // D+
+        Tier16: 500000, // D
+        Tier17: 0, // D
+    };
+    let gt = Object.entries(grade_table);
+    let final_tier = "Tier17";
+    for (let i = gt.length - 1; i >= 0; i--) {
+        const [Tier, TierScore] = gt[i];
+        if (score >= TierScore) {
+            final_tier = Tier;
+        }
+    }
+    return final_tier;
 };
 
 app.listen(8765);
