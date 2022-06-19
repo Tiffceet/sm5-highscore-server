@@ -474,7 +474,9 @@ const parseSong = (song_obj) => {
     let diffs = [];
     let [_, pack, song] = song_obj.$.Dir.split("/");
     song_obj.Steps.forEach((diff_obj) => {
-        diffs.push(parseDiff(diff_obj));
+        if(typeof diff_obj.HighScoreList !== "undefined" && typeof diff_obj.HighScoreList[0].HighScore !== "undefined") {
+            diffs.push(parseDiff(diff_obj));
+        }
     });
     return {
         pack,
