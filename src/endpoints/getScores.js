@@ -70,7 +70,7 @@ const convertScoreIntoDataRow = (
             song.diffs.forEach((diff) => {
                 // Remap pack, diff and grade
                 let cur_pack = song.pack;
-                if (!packAlias[player] && !packAlias[player][song.pack]) {
+                if (packAlias[player] && packAlias[player][song.pack]) {
                     cur_pack = packAlias[player][song.pack];
                 }
                 let cur_diff =
