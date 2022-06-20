@@ -5,7 +5,7 @@ const getScores = {
     method: "get",
     endpoint: "/getScores",
     handler: async function (req, res) {
-        let { r_song, r_pack, r_diff } = req.query;
+        let { r_song, r_pack, r_diff, sort } = req.query;
         let scores = {};
 
         let aliases = {};
@@ -26,7 +26,34 @@ const getScores = {
                 );
                 scores = { ...scores, ...JSON.parse(content) };
             }
-            res.json(convertScoreIntoDataRow(scores, aliases, req.query));
+            let data_arr = convertScoreIntoDataRow(scores, aliases, req.query);
+            if (sort === "desc") {
+                data_arr.sort((a, b) => {
+                    if (a.Score < b.Score) {
+                        return 1;
+                    }
+                    if (a.Score > b.Score) {
+                        return -1;
+                    }
+                    if (a.Score == b.Score) {
+                        return 0;
+                    }
+                });
+            }
+            if (sort === "asc") {
+                data_arr.sort((a, b) => {
+                    if (a.Score > b.Score) {
+                        return 1;
+                    }
+                    if (a.Score < b.Score) {
+                        return -1;
+                    }
+                    if (a.Score == b.Score) {
+                        return 0;
+                    }
+                });
+            }
+            res.json(data_arr);
         });
     },
 };
