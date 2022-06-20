@@ -30,4 +30,11 @@ const TIER_MAP = {
     Failed: "E (Failed)",
 };
 
-export { dirname, DIFF_MAP, TIER_MAP };
+const FC_MAP = {
+    MFC: "⚪",
+    PFC: "🟡",
+    GRFC: "🟢",
+    GOFC: "🔵",
+};
+
+export { dirname, DIFF_MAP, FC_MAP, TIER_MAP };

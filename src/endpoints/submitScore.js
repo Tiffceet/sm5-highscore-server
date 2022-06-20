@@ -1,5 +1,6 @@
 import * as xml2js from "xml2js";
 import * as fs from "fs";
+import path from "path";
 const submitScore = {
     method: "post",
     endpoint: "/submitScore",
@@ -55,6 +56,7 @@ const parseDiff = (diff_obj) => {
     // let Grade = top_score.Grade[0];
     let Grade = getDDRAGradeFromScore(+top_score.Score[0], top_score.Grade[0]);
     let MaxCombo = top_score.MaxCombo[0];
+    let FCType = getFCType(top_score);
     let Modifiers = top_score.Modifiers;
     let PercentDP = top_score.PercentDP[0];
     let Score = +top_score.Score[0];
@@ -80,7 +82,47 @@ const parseDiff = (diff_obj) => {
         Score,
         TapNoteScores,
         OK,
+        FCType,
     };
+};
+
+/**
+ *
+ * @param {*} score
+ * @returns {"NONE"|"MFC"|"PFC"|"GRFC"|"GOFC"|"ALFC"}
+ */
+const getFCType = (score) => {
+    let max_combo = +score.RadarValues[0].TapsAndHolds[0];
+    let player_max_combo = score.MaxCombo[0];
+    if (player_max_combo < max_combo) {
+        return "NONE";
+    }
+
+    let fc_type = "MFC";
+    if (+score.TapNoteScores[0].W2[0] != 0) {
+        fc_type = "PFC";
+    }
+
+    if (+score.TapNoteScores[0].W3[0] != 0) {
+        fc_type = "GRFC";
+    }
+    if (+score.TapNoteScores[0].W4[0] != 0) {
+        fc_type = "GOFC";
+    }
+    // if (+score.TapNoteScores[0].W5[0] != 0) {
+    //     fc_type = "ALFC";
+    // }
+    if (+score.HoldNoteScores[0].LetGo[0] != 0) {
+        fc_type = "NONE";
+    }
+    if (+score.HoldNoteScores[0].MissedHold[0] != 0) {
+        fc_type = "NONE";
+    }
+    if (+score.TapNoteScores[0].Miss[0] != 0) {
+        fc_type = "NONE";
+    }
+
+    return fc_type;
 };
 
 const getDDRAGradeFromScore = (score, original_grade) => {

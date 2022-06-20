@@ -1,4 +1,4 @@
-import { dirname, DIFF_MAP, TIER_MAP } from "../globals.js";
+import { dirname, DIFF_MAP, TIER_MAP, FC_MAP } from "../globals.js";
 import * as fs from "fs";
 import path from "path";
 const getScores = {
@@ -91,6 +91,14 @@ const convertScoreIntoDataRow = (
                 }
                 if (r_diff && r_diff !== cur_diff) {
                     return;
+                }
+
+                if (
+                    diff.FCType &&
+                    diff.FCType !== "NONE" &&
+                    FC_MAP[diff.FCType]
+                ) {
+                    cur_grade = cur_grade + FC_MAP[diff.FCType];
                 }
                 datarows.push({
                     DateTime: diff.DateTime,

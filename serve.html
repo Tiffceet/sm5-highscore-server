@@ -62,8 +62,9 @@
         // Setup - add a text input to each footer cell
         $('#myTable thead tr:eq(1) th').each(function () {
             var title = $(this).text();
-            let sort_these = ["PlayerName", "SongPack", "SongName", "Grade", "Difficulty"]
-            $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: 64px" class="column_search" />');
+            let sort_these = ["PlayerName", "SongPack", "SongName", "Grade", "Difficulty", "Modifiers", "Miss", "Good", "Great"]
+            let sort_these_small = ["Miss", "Good", "Great"]
+            $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: ' + (sort_these_small.includes(title) ? "32px" : "64px") + '" class="column_search" />');
         });
 
         $.ajax({
@@ -74,6 +75,7 @@
                     orderCellsTop: true,
                     bPaginate: false,
                     order: [[0, 'desc']],
+                    fixedHeader: true,
                     columns: [
                         { data: 'DateTime' },
                         { data: "PlayerName" },
