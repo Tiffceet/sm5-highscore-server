@@ -4,3 +4,4 @@ scores
 scores/**/*
 .vscode
 .vscode/**/*
+alias.json

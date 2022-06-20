@@ -35,9 +35,43 @@ const TIER_MAP = {
 };
 
 const app = express();
-app.use(bodyParser.text({ type: "text/plain", limit: '200mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '200mb' }));
+app.use(bodyParser.text({ type: "text/plain", limit: "200mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "200mb" }));
 app.use(cors.default());
+
+app.get("/getPackAliases", function (req, res) {
+    let dirname = path.resolve(path.dirname("")) + path.sep;
+
+    let aliases = {};
+    try {
+        aliases = JSON.parse(fs.readFileSync(dirname + "alias.json"));
+    } catch (e) {}
+
+    fs.readdir(`${dirname}${path.sep}scores`, function (err, filenames) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        for (let i = 0; i < filenames.length; i++) {
+            const filename = filenames[i];
+            let content = fs.readFileSync(
+                dirname + "scores" + path.sep + filename,
+                "utf-8"
+            );
+            let c = JSON.parse(content);
+            let k = Object.keys(c)[0];
+            if (!aliases[k]) {
+                aliases[k] = {};
+            }
+            c[k].forEach((s) => {
+                if (!aliases[k][s.pack]) {
+                    aliases[k][s.pack] = false;
+                }
+            });
+        }
+        res.json(aliases);
+    });
+});
 
 // curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" konishi.tk:8765/submitScore
 app.post("/submitScore", function (req, res) {
