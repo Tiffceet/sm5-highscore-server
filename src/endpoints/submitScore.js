@@ -70,6 +70,7 @@ const parseDiff = (diff_obj) => {
         },
         {}
     );
+    TapNoteScores.W4 = TapNoteScores.W4 + TapNoteScores.W5;
     let OK = +top_score.HoldNoteScores[0].Held[0];
     return {
         Difficulty,
@@ -109,9 +110,9 @@ const getFCType = (score) => {
     if (+score.TapNoteScores[0].W4[0] != 0) {
         fc_type = "GOFC";
     }
-    // if (+score.TapNoteScores[0].W5[0] != 0) {
-    //     fc_type = "ALFC";
-    // }
+    if (+score.TapNoteScores[0].W5[0] != 0) {
+        fc_type = "NONE";
+    }
     if (+score.HoldNoteScores[0].LetGo[0] != 0) {
         fc_type = "NONE";
     }
