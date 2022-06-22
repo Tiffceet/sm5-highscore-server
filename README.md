@@ -4,14 +4,23 @@ Just a simple [Express](https://expressjs.com/) server that stores stepmania sco
 ## Setup
 1. Run `npm ci --omit=dev` to install the dependencies
 2. Make 2 directories in the root folder. `_backup` and `scores`
-3. (Optional) Set environmental variable `PORT` to run the server at different port (Default: 8765)
+3. Create `alias.json` in root directory
+4. (Optional) Set environmental variable `PORT` to run the server at different port (Default: 8765)
 
 ## Information
-`scores` directory will be used to store all the submitted scores
-
-`_backup` directory will be used to store backups of each submitted scores through `POST /submitScore`
-
-By default, each endpoints will be given 200mb payload limit, if you needed more or less, please do configure yourself in the code
+- `scores` directory will be used to store all the submitted scores
+- `_backup` directory will be used to store backups of each submitted scores through `POST /submitScore`
+- By default, each endpoints will be given 200mb payload limit, if you needed more or less, please do configure yourself in the code
+- Highscore page can be viewed on http://localhost:8765/
+- `alias.json` is used to manually map the song packs name. Useful when querying `GET /getScores` with `r_pack` query. Format as shown below:
+```json
+{
+    "player_name": {
+        "song_pack_name_on_user_score": "mapped_song_pack_name",
+    },
+}
+```
+*Tip: You may use `GET /getPackAliases` to extract unique pack names from all players' scores.*
 
 ## Start the server
 ```
