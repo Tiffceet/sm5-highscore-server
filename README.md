@@ -2,7 +2,7 @@
 Just a simple [Express](https://expressjs.com/) server that stores stepmania scores. Developed in Node 16.15.0
 
 ## Setup
-1. Run `npm ci` to install the dependencies
+1. Run `npm ci --omit=dev` to install the dependencies
 2. Make 2 directories in the root folder. `_backup` and `scores`
 3. (Optional) Set environmental variable `PORT` to run the server at different port (Default: 8765)
 
