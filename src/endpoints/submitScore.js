@@ -1,6 +1,7 @@
 import * as xml2js from "xml2js";
 import * as fs from "fs";
 import path from "path";
+import { dirname } from "../globals.js";
 const submitScore = {
     method: "post",
     endpoint: "/submitScore",
@@ -18,10 +19,16 @@ const submitScore = {
                 data[username].push(parseSong(song_obj));
             });
             fs.writeFileSync(
-                `${path.resolve(path.dirname(""))}${path.sep}scores${
-                    path.sep
-                }${username}.json`,
+                `${dirname}scores${path.sep}${username}.json`,
                 JSON.stringify(data)
+            );
+
+            // Code to save a backup copy
+            fs.writeFileSync(
+                `${dirname}_backup${
+                    path.sep
+                }${username}.xml.${new Date().getTime()}`,
+                req.body
             );
         });
         res.status(200);
@@ -90,7 +97,7 @@ const parseDiff = (diff_obj) => {
 /**
  *
  * @param {*} score
- * @returns {"NONE"|"MFC"|"PFC"|"GRFC"|"GOFC"|"ALFC"}
+ * @returns {"NONE"|"MFC"|"PFC"|"GRFC"|"GOFC"}
  */
 const getFCType = (score) => {
     let max_combo = +score.RadarValues[0].TapsAndHolds[0];
