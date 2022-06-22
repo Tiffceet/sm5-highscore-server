@@ -20,9 +20,14 @@ npm start
 
 ## Available Endpoints
 The server uses port `8765` by default
-| Endpoint | Request parameters/body |
-| -------- | ------------------ |
-| GET /getPackAliases | - |
-| GET /getScores | query: r_song, r_pack, r_diff, sort |
-| POST /submitScore | text/plain: xml data from Stats.xml | 
-| POST /submitScoreIndividual | x-www-form-urlencoded: player,pack,song,Difficulty,DateTime,Disqualified,Grade,MaxCombo,Modifiers,PercentDP,Score,HitMine,AvoidMine,CheckpointMiss,Miss,W5,W4,W3,W2,W1,CheckpointHit,OK |
+| Endpoint | Content-Type | Query/Body |
+| -------- | -------------| ----------------------- |
+| GET /getPackAliases | - | - |
+| GET /getScores | GET query | r_song, r_pack, r_diff, sort |
+| POST /submitScore | text/plain; charset=UTF-8 | xml data from Stats.xml | 
+| POST /submitScoreIndividual | x-www-form-urlencoded | player,pack,song,Difficulty,DateTime,Disqualified,Grade,MaxCombo,Modifiers,PercentDP,Score,HitMine,AvoidMine,CheckpointMiss,Miss,W5,W4,W3,W2,W1,CheckpointHit,OK |
+
+## Sample score submission (using curl)
+```
+curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" localhost:8765/submitScore
+```
