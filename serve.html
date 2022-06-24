@@ -5,10 +5,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Simple SM5 Highscore Server</title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https:/cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Latin&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Anek Latin', sans-serif;
+        }
+    </style>
 </head>
 <table id="myTable" class="display">
     <thead>
@@ -58,6 +66,53 @@
 <body>
 </body>
 <script>
+    const GradeTable = [
+        "⚪",
+        "🟡",
+        "🟢",
+        "🔵",
+        "AAA+",
+        "AAA",
+        "AA+",
+        "AA",
+        "AA-",
+        "A+",
+        "A",
+        "A",
+        "B",
+        "B",
+        "B",
+        "C",
+        "C",
+        "C",
+        "D+",
+        "D",
+    ]
+    function getGradeScore(g) {
+        if (g.includes("Failed")) {
+            return -1
+        }
+        for (let i = 0; i < GradeTable.length; i++) {
+            if (g.includes(GradeTable[i])) {
+                return GradeTable.length - i
+            }
+        }
+        return -1;
+    }
+
+    function getDifficultyScore(d) {
+        switch (d) {
+            case "Beginner": return 0;
+            case "Basic": return 1;
+            case "Difficult": return 2;
+            case "Expert": return 3;
+            case "Challenge": return 4;
+        }
+        return 99;
+    }
+
+    $.fn.dataTable.ext.type.order['ddrgrade-pre'] = getGradeScore
+    $.fn.dataTable.ext.type.order['ddrdiff-pre'] = getDifficultyScore
     $(document).ready(function () {
         // Setup - add a text input to each footer cell
         $('#myTable thead tr:eq(1) th').each(function () {
@@ -66,7 +121,6 @@
             let sort_these_small = ["Miss", "Good", "Great"]
             $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: ' + (sort_these_small.includes(title) ? "32px" : "64px") + '" class="column_search" />');
         });
-
         $.ajax({
             url: "http://konishi.tk:8765/getScores",
             success: (data) => {
@@ -94,6 +148,10 @@
                         { data: "Miss" },
                         { data: "NG" },
                         { data: "Modifiers" },
+                    ],
+                    "columnDefs": [
+                        { type: "ddrdiff", targets: 4 },
+                        { type: "ddrgrade", targets: 5 }
                     ]
                 });
                 // Apply the search
