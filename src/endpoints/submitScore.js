@@ -57,7 +57,7 @@ const parseDiff = (diff_obj) => {
     let top_score = diff_obj.HighScoreList[0].HighScore[0];
 
     let DateTime = top_score.DateTime[0];
-    let Disqualified = top_score.Disqualified[0] == 0 ? false : true;
+    let NG = +top_score.HoldNoteScores[0].LetGo[0];
     // let Grade = top_score.Grade[0];
     let Grade = getDDRAGradeFromScore(+top_score.Score[0], top_score.Grade[0]);
     let MaxCombo = top_score.MaxCombo[0];
@@ -80,7 +80,7 @@ const parseDiff = (diff_obj) => {
     return {
         Difficulty,
         DateTime,
-        Disqualified,
+        NG,
         Grade,
         MaxCombo,
         Modifiers,

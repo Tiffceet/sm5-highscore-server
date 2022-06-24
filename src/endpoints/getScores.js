@@ -116,7 +116,7 @@ const convertScoreIntoDataRow = (
                     Good: diff.TapNoteScores.W4,
                     OK: diff.OK,
                     Miss: diff.TapNoteScores.Miss,
-                    Disqualified: diff.Disqualified,
+                    NG: typeof diff.NG === "number" ? diff.NG : "-",
                     Modifiers: diff.Modifiers.join(", "),
                 });
             });
