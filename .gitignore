@@ -5,3 +5,5 @@ scores/**/*
 .vscode
 .vscode/**/*
 alias.json
+_backup
+_backup/**/*

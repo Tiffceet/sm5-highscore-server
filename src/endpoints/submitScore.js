@@ -25,9 +25,7 @@ const submitScore = {
 
             // Code to save a backup copy
             fs.writeFileSync(
-                `${dirname}_backup${
-                    path.sep
-                }${username}.xml.${new Date().getTime()}`,
+                `${dirname}_backup${path.sep}${username}.xml`,
                 req.body
             );
         });
@@ -100,6 +98,17 @@ const parseDiff = (diff_obj) => {
  * @returns {"NONE"|"MFC"|"PFC"|"GRFC"|"GOFC"}
  */
 const getFCType = (score) => {
+    // Attempt to read stage award before parsing the fc manually
+    if (score.StageAward && score.StageAward[0]) {
+        switch (score.StageAward[0]) {
+            case "FullComboW3":
+                return "GRFC";
+            case "FullComboW2":
+                return "PFC";
+            case "FullComboW1":
+                return "MFC";
+        }
+    }
     let max_combo = +score.RadarValues[0].TapsAndHolds[0];
     let player_max_combo = score.MaxCombo[0];
     if (player_max_combo < max_combo) {
