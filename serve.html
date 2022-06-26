@@ -88,6 +88,15 @@
         "D+",
         "D",
     ]
+
+    const DiffColor = {
+        "Beginner": "#23c3fb",
+        "Basic": "#fba020",
+        "Difficult": "#df3746",
+        "Expert": "#24ce17",
+        "Challenge": "#f914fb",
+    }
+
     function getGradeScore(g) {
         if (g.includes("Failed")) {
             return -1
@@ -101,13 +110,11 @@
     }
 
     function getDifficultyScore(d) {
-        switch (d) {
-            case "Beginner": return 0;
-            case "Basic": return 1;
-            case "Difficult": return 2;
-            case "Expert": return 3;
-            case "Challenge": return 4;
-        }
+        if (d.includes("Beginner")) return 0
+        if (d.includes("Basic")) return 1
+        if (d.includes("Difficult")) return 2
+        if (d.includes("Expert")) return 3
+        if (d.includes("Challenge")) return 4
         return 99;
     }
 
@@ -122,7 +129,7 @@
             $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: ' + (sort_these_small.includes(title) ? "32px" : "64px") + '" class="column_search" />');
         });
         $.ajax({
-            url: "http://konishi.tk:8765/getScores",
+            url: "http://looz.servehttp.com/getScores",
             success: (data) => {
                 let table = $('#myTable').DataTable({
                     data: data,
@@ -135,7 +142,12 @@
                         { data: "PlayerName" },
                         { data: "SongPack" },
                         { data: "SongName" },
-                        { data: "Difficulty" },
+                        {
+                            data: "Difficulty",
+                            render: function (data, type, row) {
+                                return `<b style="color: ${DiffColor[data] ? DiffColor[data] : "#808080"}">${data}</b>`
+                            }
+                        },
                         { data: "Grade" },
                         { data: "Score" },
                         { data: "PercentDP" },
