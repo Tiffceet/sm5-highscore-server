@@ -103,7 +103,16 @@
         }
         for (let i = 0; i < GradeTable.length; i++) {
             if (g.includes(GradeTable[i])) {
-                return GradeTable.length - i
+                let score = GradeTable.length - i
+                if (i >= 0 && i <= 3) {
+                    g = g.slice(0, -1)
+                    for (let j = 0; j < GradeTable.length; j++) {
+                        if (g.includes(GradeTable[j])) {
+                            return score + (GradeTable.length - j) / 10
+                        }
+                    }
+                }
+                return score
             }
         }
         return -1;
