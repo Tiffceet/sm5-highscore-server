@@ -23,12 +23,18 @@ DIFF_TABLE_COLOR =  [
     Fore.MAGENTA
 ]
 
-THEME_PATH = "C:\\Games\\StepMania 5\\Themes\\STARLiGHT"
-BAT_PATH = "\"C:\\Users\\Looz\\AppData\\Roaming\\StepMania 5\\1_submit_score.bat\""
+THEME_PATH = ""
+BAT_PATH = ""
+HOST = "http://localhost:8765"
+
+if len(sys.argv) >= 2:
+    THEME_PATH = sys.argv[1]
 
 if len(sys.argv) >= 3:
-    THEME_PATH = sys.argv[1]
     BAT_PATH = sys.argv[2]
+
+if len(sys.argv) >= 4:
+    HOST = sys.argv[3]
 
 CUR_SONG_PATH = f"{THEME_PATH}\\NowPlaying-P1.txt"
 SONG_SELECT_EVENT_PATH = f"{THEME_PATH}\\SongSelectLoaded.txt"
@@ -93,7 +99,7 @@ def printActiveSong():
     if song_name == "":
         return ""
 
-    url = "http://looz.servehttp.com/getScores"
+    url = f"{HOST}/getScores"
     params = {
         'r_song': song_name
     }
