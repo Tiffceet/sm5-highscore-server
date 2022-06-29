@@ -1,10 +1,11 @@
 import requests
 import os
-import urllib.parse
 import time
 import colorama
+import sys
 from operator import itemgetter
 from colorama import Fore, Back, Style
+
 colorama.init()
 
 DIFF_TABLE = [
@@ -22,9 +23,16 @@ DIFF_TABLE_COLOR =  [
     Fore.MAGENTA
 ]
 
-CUR_SONG_PATH = "C:\\Games\\StepMania 5\\Themes\\STARLiGHT\\NowPlaying-P1.txt"
-SONG_SELECT_EVENT_PATH = "C:\\Games\\StepMania 5\\Themes\\STARLiGHT\\SongSelectLoaded.txt"
-SUBMIT_SCORE_BAT_PATH = "\"C:\\Users\\Looz\\AppData\\Roaming\\StepMania 5\\1_submit_score.bat\" >NUL"
+THEME_PATH = "C:\\Games\\StepMania 5\\Themes\\STARLiGHT"
+BAT_PATH = "\"C:\\Users\\Looz\\AppData\\Roaming\\StepMania 5\\1_submit_score.bat\""
+
+if len(sys.argv) >= 3:
+    THEME_PATH = sys.argv[1]
+    BAT_PATH = sys.argv[2]
+
+CUR_SONG_PATH = f"{THEME_PATH}\\NowPlaying-P1.txt"
+SONG_SELECT_EVENT_PATH = f"{THEME_PATH}\\SongSelectLoaded.txt"
+SUBMIT_SCORE_BAT_PATH = f"{BAT_PATH} >NUL"
 
 FC_TABLE = ["🔵","🟢","🟡","⚪"]
 FC_TABLE_COLOR = [Fore.CYAN, Fore.GREEN, Fore.YELLOW, Fore.LIGHTWHITE_EX]
