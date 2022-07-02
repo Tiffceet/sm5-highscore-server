@@ -94,7 +94,7 @@ def getCurTimestamp():
     return randoTS
 
 def printActiveSong():
-    os.system("clear")
+    os.system("cls")
     song_name = getCurSong()
     if song_name == "":
         return ""
