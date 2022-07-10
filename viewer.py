@@ -66,7 +66,10 @@ def printScore(score):
     print(pdiff)
 
     ranking = 1
+    rank_counts = 0
     for x in range(len(score)):
+        if rank_counts >= 3:
+            break
         pname = score[x]["PlayerName"]
         pscore = score[x]["Score"]
         pgrade = str(score[x]["Grade"])
@@ -79,6 +82,7 @@ def printScore(score):
         pmods = score[x]["Modifiers"].split(",")[0].strip()
         print("  {:<3} {:<10} {:,} {} {} {}".format(str(ranking) + ".", pname, pscore, pgrade, ptns, pmods))
         ranking += 1
+        rank_counts += 1
 
 def getCurSong():
     try:
