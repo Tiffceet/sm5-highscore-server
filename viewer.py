@@ -36,6 +36,13 @@ if len(sys.argv) >= 3:
 if len(sys.argv) >= 4:
     HOST = sys.argv[3]
 
+print("THEME_PATH: " + THEME_PATH)
+print("BAT_PATH: " + BAT_PATH)
+print("HOST: " + HOST)
+
+print("\nLoading...")
+time.sleep(5)
+
 CUR_SONG_PATH = f"{THEME_PATH}\\NowPlaying-P1.txt"
 SONG_SELECT_EVENT_PATH = f"{THEME_PATH}\\SongSelectLoaded.txt"
 SUBMIT_SCORE_BAT_PATH = f"{BAT_PATH} >NUL"
@@ -125,6 +132,8 @@ def printActiveSong():
     printScore(edit)
     return song_name
 
+os.system("cls")
+print("Waiting for stepmania...")
 last_cur_song = ""
 last_ts = ""
 while(True):
