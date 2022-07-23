@@ -5,7 +5,7 @@ const getScores = {
     method: "get",
     endpoint: "/getScores",
     handler: async function (req, res) {
-        let { r_song, r_pack, r_diff, sort } = req.query;
+        let { r_song, r_pack, r_diff, sort, score_type } = req.query;
         let scores = {};
 
         let aliases = {};
@@ -24,7 +24,15 @@ const getScores = {
                     dirname + "scores" + path.sep + filename,
                     "utf-8"
                 );
-                scores = { ...scores, ...JSON.parse(content) };
+                content = JSON.parse(content);
+                if (score_type) {
+                    if (content.score_type != score_type) {
+                        continue;
+                    }
+                }
+                let new_score_obj = {};
+                new_score_obj[`${content.username}`] = content.scores;
+                scores = { ...scores, ...new_score_obj };
             }
             let data_arr = convertScoreIntoDataRow(scores, aliases, req.query);
             if (sort === "desc") {

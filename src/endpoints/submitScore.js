@@ -2,24 +2,36 @@ import * as xml2js from "xml2js";
 import * as fs from "fs";
 import path from "path";
 import { dirname } from "../globals.js";
+// curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" localhost:8765/submitScore
 const submitScore = {
     method: "post",
     endpoint: "/submitScore",
     handler: function (req, res) {
+        let score_type = "-";
+        if (req.query.score_type) {
+            score_type = req.query.score_type;
+        }
+
         xml2js.parseString(req.body, (err, result) => {
             if (err) {
                 console.error(err);
                 return;
             }
 
-            let data = {};
             let username = result.Stats.GeneralData[0].DisplayName[0];
+            let data = {
+                username,
+                score_type,
+                scores: [],
+            };
             data[username] = [];
             result.Stats.SongScores[0].Song.forEach((song_obj) => {
-                data[username].push(parseSong(song_obj));
+                data.scores.push(parseSong(song_obj));
             });
             fs.writeFileSync(
-                `${dirname}scores${path.sep}${username}.json`,
+                `${dirname}scores${path.sep}${username}${
+                    score_type === "-" ? "" : "-" + score_type
+                }.json`,
                 JSON.stringify(data)
             );
 
