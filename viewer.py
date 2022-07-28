@@ -15,7 +15,7 @@ DIFF_TABLE = [
     "Expert",
     "Challenge"
 ]
-DIFF_TABLE_COLOR =  [
+DIFF_TABLE_COLOR = [
     Fore.CYAN,
     Fore.YELLOW,
     Fore.RED,
@@ -26,6 +26,7 @@ DIFF_TABLE_COLOR =  [
 THEME_PATH = ""
 BAT_PATH = ""
 HOST = "http://localhost:8765"
+SCORE_TYPE = ""
 
 if len(sys.argv) >= 2:
     THEME_PATH = sys.argv[1]
@@ -36,9 +37,13 @@ if len(sys.argv) >= 3:
 if len(sys.argv) >= 4:
     HOST = sys.argv[3]
 
+if len(sys.argv) >= 5:
+    SCORE_TYPE = sys.argv[4]
+
 print("THEME_PATH: " + THEME_PATH)
 print("BAT_PATH: " + BAT_PATH)
 print("HOST: " + HOST)
+print("SCORE_TYPE: " + SCORE_TYPE)
 
 print("\nLoading...")
 time.sleep(5)
@@ -47,13 +52,14 @@ CUR_SONG_PATH = f"{THEME_PATH}\\NowPlaying-P1.txt"
 SONG_SELECT_EVENT_PATH = f"{THEME_PATH}\\SongSelectLoaded.txt"
 SUBMIT_SCORE_BAT_PATH = f"{BAT_PATH} >NUL"
 
-FC_TABLE = ["🔵","🟢","🟡","⚪"]
+FC_TABLE = ["🔵", "🟢", "🟡", "⚪"]
 FC_TABLE_COLOR = [Fore.CYAN, Fore.GREEN, Fore.YELLOW, Fore.LIGHTWHITE_EX]
+
 
 def printScore(score):
     if len(score) == 0:
         return
-    score = sorted(score, key=itemgetter('Score'), reverse=True) 
+    score = sorted(score, key=itemgetter('Score'), reverse=True)
     diff_idx = -1
     try:
         diff_idx = DIFF_TABLE.index(score[0]["Difficulty"])
@@ -78,11 +84,14 @@ def printScore(score):
         if pgrade[-1:] in FC_TABLE:
             pgrade = FC_TABLE_COLOR[FC_TABLE.index(pgrade[-1:])] + pgrade[:-1]
         sep = Fore.RESET + "|"
-        ptns = Fore.LIGHTWHITE_EX + str(score[x]["Marvelous"]) +sep+ Fore.YELLOW + str(score[x]["Perfect"]) +sep+ Fore.GREEN + str(score[x]["Great"]) +sep+ Fore.CYAN + str(score[x]["Good"]) +sep+ Fore.RED + str(score[x]["Miss"]) + Fore.RESET
+        ptns = Fore.LIGHTWHITE_EX + str(score[x]["Marvelous"]) + sep + Fore.YELLOW + str(score[x]["Perfect"]) + sep + Fore.GREEN + str(
+            score[x]["Great"]) + sep + Fore.CYAN + str(score[x]["Good"]) + sep + Fore.RED + str(score[x]["Miss"]) + Fore.RESET
         pmods = score[x]["Modifiers"].split(",")[0].strip()
-        print("  {:<3} {:<10} {:,} {} {} {}".format(str(ranking) + ".", pname, pscore, pgrade, ptns, pmods))
+        print("  {:<3} {:<10} {:,} {} {} {}".format(
+            str(ranking) + ".", pname, pscore, pgrade, ptns, pmods))
         ranking += 1
         rank_counts += 1
+
 
 def getCurSong():
     try:
@@ -95,6 +104,7 @@ def getCurSong():
     f.close()
     return song_name
 
+
 def getCurTimestamp():
     try:
         f = open(SONG_SELECT_EVENT_PATH, "r")
@@ -104,6 +114,7 @@ def getCurTimestamp():
     f.close()
     return randoTS
 
+
 def printActiveSong():
     os.system("cls")
     song_name = getCurSong()
@@ -111,11 +122,13 @@ def printActiveSong():
         return ""
 
     url = f"{HOST}/getScores"
+    if SCORE_TYPE != "":
+        url = url + "?score_type=" + SCORE_TYPE
     params = {
         'r_song': song_name
     }
 
-    r = requests.get(url = url, params = params)
+    r = requests.get(url=url, params=params)
 
     data = r.json()
 
@@ -124,7 +137,8 @@ def printActiveSong():
     dif = [i for i in data if i["Difficulty"] == "Difficult"]
     exprt = [i for i in data if i["Difficulty"] == "Expert"]
     chall = [i for i in data if i["Difficulty"] == "Challenge"]
-    edit = [i for i in data if i["Difficulty"] != "Challenge" and i["Difficulty"] != "Beginner" and i["Difficulty"] != "Basic" and i["Difficulty"] != "Difficult" and i["Difficulty"] != "Expert"]
+    edit = [i for i in data if i["Difficulty"] != "Challenge" and i["Difficulty"] !=
+            "Beginner" and i["Difficulty"] != "Basic" and i["Difficulty"] != "Difficult" and i["Difficulty"] != "Expert"]
 
     print("Song: " + song_name)
     print("")
@@ -135,6 +149,7 @@ def printActiveSong():
     printScore(chall)
     printScore(edit)
     return song_name
+
 
 os.system("cls")
 print("Waiting for stepmania...")
@@ -148,5 +163,5 @@ while(True):
 
     if getCurSong() != last_cur_song:
         last_cur_song = printActiveSong()
-    
+
     time.sleep(1)
