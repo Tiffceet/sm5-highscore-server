@@ -170,9 +170,11 @@
                 let table = $('#myTable').DataTable({
                     data: data,
                     orderCellsTop: true,
-                    bPaginate: false,
+                    bPaginate: true,
+                    bLengthChange: false,
                     order: [[0, 'desc']],
                     fixedHeader: true,
+                    pageLength: 100,
                     columns: [
                         { data: 'DateTime' },
                         { data: "PlayerName" },
