@@ -23,10 +23,20 @@
         }
     </style>
 </head>
-<b>Controller Type: </b>
-<a href="/">All</a> |
-<a href="/?score_type=pad">Pad</a> |
-<a href="/?score_type=controller">Controller</a>
+<div style="display:grid;grid-template-columns: 1fr 1fr; padding-bottom: 5px">
+    <div style="text-align: left;">
+        <b>Controller Type: </b>
+        <a href="/">All</a> |
+        <a href="/?score_type=pad">Pad</a> |
+        <a href="/?score_type=controller">Controller</a>
+    </div>
+    <div style="text-align: right;">
+        <b>Compare Player: </b>
+        <select name="comparePlayerSelect" onchange="comparePlayerSelectOnChange()">
+            <option>-</option>
+        </select>
+    </div>
+</div>
 <table id="myTable" class="display">
     <thead>
         <tr>
@@ -150,13 +160,37 @@
         return 99;
     }
 
+    function loadUniquePlayers(data) {
+        let compareArg = findGetParameter("compare")
+
+        let uniquePlayers = {}
+        for (let i = 0; i < data.length; i++) {
+            let playerName = data[i].PlayerName
+            if (typeof uniquePlayers[playerName] === "undefined") {
+                uniquePlayers[playerName] = true;
+                if (playerName === compareArg) {
+                    $("select[name=comparePlayerSelect]").append(`<option selected>${playerName}</option>`)
+                } else {
+                    $("select[name=comparePlayerSelect]").append(`<option>${playerName}</option>`)
+                }
+
+            }
+        }
+    }
+
+    function comparePlayerSelectOnChange() {
+        $('#myTable').DataTable()
+            .rows().invalidate('data')
+            .draw(false);
+    }
+
     $.fn.dataTable.ext.type.order['ddrgrade-pre'] = getGradeScore
     $.fn.dataTable.ext.type.order['ddrdiff-pre'] = getDifficultyScore
     $(document).ready(function () {
         // Setup - add a text input to each footer cell
         $('#myTable thead tr:eq(1) th').each(function () {
             var title = $(this).text();
-            let sort_these = ["PlayerName", "SongPack", "SongName", "Grade", "Difficulty", "Modifiers", "Miss", "Good", "Great"]
+            let sort_these = ["PlayerName", "SongPack", "SongName", "Grade", "Score", "Difficulty", "Modifiers", "Miss", "Good", "Great"]
             let sort_these_small = ["Miss", "Good", "Great"]
             $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: ' + (sort_these_small.includes(title) ? "32px" : "64px") + '" class="column_search" />');
         });
@@ -167,6 +201,7 @@
         $.ajax({
             url: score_url,
             success: (data) => {
+                loadUniquePlayers(data);
                 let table = $('#myTable').DataTable({
                     data: data,
                     orderCellsTop: true,
@@ -182,12 +217,33 @@
                         { data: "SongName" },
                         {
                             data: "Difficulty",
-                            render: function (data, type, row) {
-                                return `<b style="color: ${DiffColor[data] ? DiffColor[data] : "#808080"}">${data}</b>`
+                            render: function (renderData, type, row) {
+                                return `<b style="color: ${DiffColor[renderData] ? DiffColor[renderData] : "#808080"}">${renderData}</b>`
                             }
                         },
                         { data: "Grade" },
-                        { data: "Score" },
+                        {
+                            data: "Score",
+                            render: function (renderData, type, row) {
+                                let comparePlayer = $("select[name=comparePlayerSelect]").val()
+                                if (comparePlayer === "-") {
+                                    return renderData;
+                                }
+
+                                let target = data.find(x =>
+                                    x.SongName === row.SongName && x.Difficulty === row.Difficulty && x.PlayerName === comparePlayer
+                                )
+                                if (typeof target === 'undefined') {
+                                    return renderData;
+                                }
+
+                                let score_diff = row.Score - target.Score
+                                if (row.PlayerName === comparePlayer) {
+                                    score_diff = 0
+                                }
+                                return renderData + `<br /><span style="color:${score_diff >= 0 ? "green" : "red"}">${score_diff >= 0 ? "+" : ""}${score_diff}</span>`
+                            }
+                        },
                         { data: "PercentDP" },
                         { data: "MaxCombo" },
                         { data: "Marvelous" },
