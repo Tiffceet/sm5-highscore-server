@@ -194,7 +194,7 @@
             let sort_these_small = ["Miss", "Good", "Great"]
             $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: ' + (sort_these_small.includes(title) ? "32px" : "64px") + '" class="column_search" />');
         });
-        let score_url = "http://looz.servehttp.com/getScores"
+        let score_url = "http://looz.servehttp.com:3001/getScores"
         if (findGetParameter("score_type")) {
             score_url = score_url + "?score_type=" + findGetParameter("score_type")
         }
@@ -244,7 +244,12 @@
                                 return renderData + `<br /><span style="color:${score_diff >= 0 ? "green" : "red"}">${score_diff >= 0 ? "+" : ""}${score_diff}</span>`
                             }
                         },
-                        { data: "PercentDP" },
+                        {
+                            data: "PercentDP",
+                            render: function (renderData, type, row) {
+                                return (Number(renderData) * 100).toFixed(2) + " %"
+                            }
+                        },
                         { data: "MaxCombo" },
                         { data: "Marvelous" },
                         { data: "Perfect" },
