@@ -5,7 +5,7 @@ import colorama
 import sys
 from operator import itemgetter
 from colorama import Fore, Back, Style
-
+from datetime import datetime
 colorama.init()
 
 DIFF_TABLE = [
@@ -78,7 +78,13 @@ def printScore(score):
             break
         pname = score[x]["PlayerName"]
         pscore = score[x]["Score"]
+        pdatetime = score[x]["DateTime"]
         pgrade = str(score[x]["Grade"])
+
+        pdatetime = datetime.strptime(pdatetime, '%Y-%m-%d %H:%M:%f')
+        zfill_lambda = lambda x : str(x).zfill(2)[-2:]
+        pdatetime = "{}{}{}".format(zfill_lambda(pdatetime.year), zfill_lambda(pdatetime.month), zfill_lambda(pdatetime.day))
+
         if "Failed" in pgrade:
             pgrade = pgrade[:1]
         if pgrade[-1:] in FC_TABLE:
@@ -87,8 +93,8 @@ def printScore(score):
         ptns = Fore.LIGHTWHITE_EX + str(score[x]["Marvelous"]) + sep + Fore.YELLOW + str(score[x]["Perfect"]) + sep + Fore.GREEN + str(
             score[x]["Great"]) + sep + Fore.CYAN + str(score[x]["Good"]) + sep + Fore.RED + str(score[x]["Miss"]) + Fore.RESET
         pmods = score[x]["Modifiers"].split(",")[0].strip()
-        print("  {:<3} {:<10} {:,} {} {} {}".format(
-            str(ranking) + ".", pname, pscore, pgrade, ptns, pmods))
+        print("{:<3} {:<10} {:,} {} {} {}".format(
+            pdatetime, pname, pscore, pgrade, ptns, pmods))
         ranking += 1
         rank_counts += 1
 
