@@ -49,6 +49,7 @@
 </head>
 <div style="display:grid;grid-template-columns: 1fr 1fr; padding-bottom: 5px">
     <div style="text-align: left;">
+        <button onclick="refetchData()">Refresh Score</button>
         <b>Controller Type: </b>
         <a href="/">All</a> |
         <a href="/?score_type=pad">Pad</a> |
@@ -111,6 +112,10 @@
 <body>
 </body>
 <script>
+    var score_url = "http://looz.servehttp.com:3001/getScores"
+
+    var score_data = []
+
     function findGetParameter(parameterName) {
         var result = null,
             tmp = [];
@@ -208,6 +213,19 @@
             .draw(false);
     }
 
+    function refetchData() {
+        $.ajax({
+            url: score_url,
+            success: (data) => {
+                score_data = data
+                let dataTable = $("#myTable").DataTable()
+                dataTable.clear()
+                dataTable.rows.add(score_data)
+                dataTable.draw()
+            }
+        })
+    }
+
     $.fn.dataTable.ext.type.order['ddrgrade-pre'] = getGradeScore
     $.fn.dataTable.ext.type.order['ddrdiff-pre'] = getDifficultyScore
     $(document).ready(function () {
@@ -218,16 +236,18 @@
             let sort_these_small = ["Miss", "Good", "Great"]
             $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: ' + (sort_these_small.includes(title) ? "32px" : "64px") + '" class="column_search" />');
         });
-        let score_url = "http://looz.servehttp.com:3001/getScores"
+
         if (findGetParameter("score_type")) {
             score_url = score_url + "?score_type=" + findGetParameter("score_type")
         }
+
         $.ajax({
             url: score_url,
             success: (data) => {
-                loadUniquePlayers(data);
+                score_data = data;
+                loadUniquePlayers(score_data);
                 let table = $('#myTable').DataTable({
-                    data: data,
+                    data: score_data,
                     orderCellsTop: true,
                     bPaginate: true,
                     bLengthChange: false,
@@ -254,7 +274,7 @@
                                     return renderData;
                                 }
 
-                                let target = data.find(x =>
+                                let target = score_data.find(x =>
                                     x.SongName === row.SongName && x.Difficulty === row.Difficulty && x.PlayerName === comparePlayer
                                 )
                                 if (typeof target === 'undefined') {
@@ -277,7 +297,7 @@
                                     return renderData;
                                 }
 
-                                let target = data.find(x =>
+                                let target = score_data.find(x =>
                                     x.SongName === row.SongName && x.Difficulty === row.Difficulty && x.PlayerName === comparePlayer
                                 )
                                 if (typeof target === 'undefined') {
