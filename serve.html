@@ -47,6 +47,7 @@
         }
     </style>
 </head>
+<button onclick="refetchData()" style="position: fixed; bottom: 0; right: 0; z-index: 9999;">Refresh Score</button>
 <div style="display:grid;grid-template-columns: 1fr 1fr; padding-bottom: 5px">
     <div style="text-align: left;">
         <button onclick="refetchData()">Refresh Score</button>
@@ -294,14 +295,14 @@
                                 const formatPercentDP = (pdp) => (Number(pdp) * 100).toFixed(2) + " %"
                                 let comparePlayer = $("select[name=comparePlayerSelect]").val()
                                 if (comparePlayer === "-") {
-                                    return renderData;
+                                    return formatPercentDP(renderData);
                                 }
 
                                 let target = score_data.find(x =>
                                     x.SongName === row.SongName && x.Difficulty === row.Difficulty && x.PlayerName === comparePlayer
                                 )
                                 if (typeof target === 'undefined') {
-                                    return renderData;
+                                    return formatPercentDP(renderData);
                                 }
 
                                 let precent_diff = row.PercentDP - target.PercentDP
