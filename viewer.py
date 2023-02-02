@@ -6,8 +6,10 @@ import sys
 from operator import itemgetter
 from colorama import Fore, Back, Style
 from datetime import datetime
+from xml.dom import minidom
 colorama.init()
 
+# Globals
 DIFF_TABLE = [
     "Beginner",
     "Basic",
@@ -22,35 +24,45 @@ DIFF_TABLE_COLOR = [
     Fore.GREEN,
     Fore.MAGENTA
 ]
+EVERYONE_DANCE_PATH = os.path.join(
+    os.getenv("appdata"), "StepMania 5", "Save")
+EVERYONE_DANCE = os.path.join(
+    os.getenv("appdata"), "StepMania 5", "Save", "everyone.dance.txt")
+LOCAL_PROFILE = os.path.join(
+    os.getenv("appdata"), "StepMania 5", "Save", "LocalProfiles")
 
-THEME_PATH = ""
-BAT_PATH = ""
+class CustomParser:
+    def __init__(self, data_arr):
+        self.__data = data_arr
+        self.__data = list(map(lambda x: str(x).strip("\n"), self.__data))
+
+    def get(self, field):
+        lines = []
+        for line in self.__data:
+            if line.startswith(f"{field}:"):
+                lines.append(line[len(field) + 1:])
+        return CustomParser(lines)
+
+    @property
+    def value(self):
+        if len(self.__data) <= 0:
+            return None
+        return str(self.__data[0]).strip("\n")
+
+
+# Command line arguments
+PROFILE_NAME = "Dummy"
+SCORE_TYPE = "controller"
 HOST = "http://localhost:8765"
-SCORE_TYPE = ""
 
 if len(sys.argv) >= 2:
-    THEME_PATH = sys.argv[1]
+    PROFILE_NAME = sys.argv[1]
 
 if len(sys.argv) >= 3:
-    BAT_PATH = sys.argv[2]
+    SCORE_TYPE = sys.argv[2]
 
 if len(sys.argv) >= 4:
     HOST = sys.argv[3]
-
-if len(sys.argv) >= 5:
-    SCORE_TYPE = sys.argv[4]
-
-print("THEME_PATH: " + THEME_PATH)
-print("BAT_PATH: " + BAT_PATH)
-print("HOST: " + HOST)
-print("SCORE_TYPE: " + SCORE_TYPE)
-
-print("\nLoading...")
-time.sleep(5)
-
-CUR_SONG_PATH = f"{THEME_PATH}\\NowPlaying-P1.txt"
-SONG_SELECT_EVENT_PATH = f"{THEME_PATH}\\SongSelectLoaded.txt"
-SUBMIT_SCORE_BAT_PATH = f"{BAT_PATH} >NUL"
 
 FC_TABLE = ["🔵", "🟢", "🟡", "⚪"]
 FC_TABLE_COLOR = [Fore.CYAN, Fore.GREEN, Fore.YELLOW, Fore.LIGHTWHITE_EX]
@@ -82,8 +94,9 @@ def printScore(score):
         pgrade = str(score[x]["Grade"])
 
         pdatetime = datetime.strptime(pdatetime, '%Y-%m-%d %H:%M:%f')
-        zfill_lambda = lambda x : str(x).zfill(2)[-2:]
-        pdatetime = "{}{}{}".format(zfill_lambda(pdatetime.year), zfill_lambda(pdatetime.month), zfill_lambda(pdatetime.day))
+        def zfill_lambda(x): return str(x).zfill(2)[-2:]
+        pdatetime = "{}{}{}".format(zfill_lambda(pdatetime.year), zfill_lambda(
+            pdatetime.month), zfill_lambda(pdatetime.day))
 
         if "Failed" in pgrade:
             pgrade = pgrade[:1]
@@ -100,32 +113,18 @@ def printScore(score):
 
 
 def getCurSong():
-    try:
-        f = open(CUR_SONG_PATH, "r")
-    except:
-        return ""
-    song_name = f.read()
-    song_name = song_name[:-1]
-    song_name = song_name[song_name.rfind("/")+1:]
-    f.close()
-    return song_name
-
-
-def getCurTimestamp():
-    try:
-        f = open(SONG_SELECT_EVENT_PATH, "r")
-    except:
-        return ""
-    randoTS = f.read()
-    f.close()
-    return randoTS
-
+    with open(EVERYONE_DANCE, "r") as f:
+        lines = f.readlines()
+        song_name = ""
+        for line in lines:
+            if line.startswith('song_info:name:'):
+                song_name = line[15:].strip("\n")
+                break
+        return song_name
 
 def printActiveSong():
-    os.system("cls")
     song_name = getCurSong()
-    if song_name == "":
-        return ""
+    os.system("cls")
 
     url = f"{HOST}/getScores"
     if SCORE_TYPE != "":
@@ -157,17 +156,85 @@ def printActiveSong():
     return song_name
 
 
-os.system("cls")
-print("Waiting for stepmania...")
-last_cur_song = ""
-last_ts = ""
-while(True):
-    if getCurTimestamp() != last_ts:
-        last_ts = getCurTimestamp()
-        os.system(SUBMIT_SCORE_BAT_PATH)
-        last_cur_song = printActiveSong()
+def printActiveSongLiveStat():
+    print("TODO:")
+    os.system("cls")
+    stats = readstats()
+    val = stats.get('steps_info').get('W1').value
+    print(val)
 
-    if getCurSong() != last_cur_song:
-        last_cur_song = printActiveSong()
 
-    time.sleep(1)
+def submitScore():
+    # 1. Get profile
+    dirs = os.listdir(LOCAL_PROFILE)
+    stat_path = ""
+    for prof_folder in dirs:
+        file_path = os.path.join(LOCAL_PROFILE, prof_folder, "Stats.xml")
+        file = minidom.parse(file_path)
+        display_name = file.getElementsByTagName(
+            "DisplayName")[0].childNodes[0].data
+        if display_name == PROFILE_NAME:
+            stat_path = os.path.join(LOCAL_PROFILE, prof_folder)
+            break
+    else:
+        print(f"Cannot get PROFILE_NAME ({PROFILE_NAME})")
+        return
+
+    os.system(f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
+    pass
+
+
+def readstats():
+    with open(EVERYONE_DANCE, "r") as f:
+        data = f.readlines()
+        stats = CustomParser(data)
+        return stats
+
+
+if __name__ == "__main__":
+    print("PROFILE_NAME: " + PROFILE_NAME)
+    print("SCORE_TYPE: " + SCORE_TYPE)
+    print("HOST: " + HOST)
+
+    print("\nLoading...")
+    # DEV: Change back in release
+    # time.sleep(5)    
+
+    # Main loop
+    ingame = "true"
+    song_name = ""
+    printActiveSong()
+    while True:
+        stats = readstats()
+        __ingame = stats.get("ingame").value
+        if __ingame == 'false':
+            if ingame == 'true':
+                os.system("cls")
+                print("Submitting score...")
+                submitScore()
+                printActiveSong()
+            __song_name = getCurSong()
+            if song_name != __song_name:
+                song_name = __song_name
+                printActiveSong()
+        else:
+            printActiveSongLiveStat()
+        
+        ingame = __ingame
+        time.sleep(0.5)
+
+
+# os.system("cls")
+# print("Waiting for stepmania...")
+# last_cur_song = ""
+# last_ts = ""
+# while(True):
+#     if getCurTimestamp() != last_ts:
+#         last_ts = getCurTimestamp()
+#         os.system(SUBMIT_SCORE_BAT_PATH)
+#         last_cur_song = printActiveSong()
+
+#     if getCurSong() != last_cur_song:
+#         last_cur_song = printActiveSong()
+
+#     time.sleep(1)
