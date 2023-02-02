@@ -55,19 +55,13 @@ Command line live score viewer
 
 ```
 Usage:
-    py viewer.py <theme_path> <batch_file> <host>
+    py viewer.py <profile_name> <score_type> <host>
 
     Arguments:
-        theme_path      Path to theme folder containing NowPlaying-P1.txt & SongSelectLoaded.txt
-        batch_file      batch file to execute on music changed
+        profile_name    Profile name which score to be submitted
+        score_type      Accept: controller, pad
         host            (Optional) HTTP url to the server; Default: http://localhost:8765
 
     Description:
-        The program will watch for changes in NowPlaying-P1.txt and shows the respective score of
-        the playing song as stated in NowPlaying-P1.txt.
-
-        Sample: /Songs/DDR A/RISING FIRE HAWK/
-
-        Other than that, it will also watch for changes in SongSelectLoaded.txt to determine
-        when to execute the batch file as given through the batch_file argument.
+        The program will read everyone.dance.txt for stats every 1 seconds and provide scoring from the server
 ```

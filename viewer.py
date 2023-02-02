@@ -10,6 +10,14 @@ from xml.dom import minidom
 colorama.init()
 
 # Globals
+DIFF_TABLE_SM5 = [
+    "Beginner",
+    "Easy",
+    "Medium",
+    "Hard",
+    "Challenge"
+    "Edit"
+]
 DIFF_TABLE = [
     "Beginner",
     "Basic",
@@ -31,6 +39,7 @@ EVERYONE_DANCE = os.path.join(
 LOCAL_PROFILE = os.path.join(
     os.getenv("appdata"), "StepMania 5", "Save", "LocalProfiles")
 
+
 class CustomParser:
     def __init__(self, data_arr):
         self.__data = data_arr
@@ -51,7 +60,7 @@ class CustomParser:
 
 
 # Command line arguments
-PROFILE_NAME = "Dummy"
+PROFILE_NAME = ""
 SCORE_TYPE = "controller"
 HOST = "http://localhost:8765"
 
@@ -122,10 +131,8 @@ def getCurSong():
                 break
         return song_name
 
-def printActiveSong():
-    song_name = getCurSong()
-    os.system("cls")
 
+def getScoresByName(song_name):
     url = f"{HOST}/getScores"
     if SCORE_TYPE != "":
         url = url + "?score_type=" + SCORE_TYPE
@@ -136,6 +143,14 @@ def printActiveSong():
     r = requests.get(url=url, params=params)
 
     data = r.json()
+    return data
+
+
+def printActiveSong():
+    song_name = getCurSong()
+    os.system("cls")
+
+    data = getScoresByName(song_name)
 
     beg = [i for i in data if i["Difficulty"] == "Beginner"]
     bas = [i for i in data if i["Difficulty"] == "Basic"]
@@ -156,12 +171,94 @@ def printActiveSong():
     return song_name
 
 
-def printActiveSongLiveStat():
-    print("TODO:")
+def getTop3Score(diff):
+    song_name = getCurSong()
+    data = getScoresByName(song_name)
+    score = [i for i in data if i["Difficulty"] ==
+             DIFF_TABLE[DIFF_TABLE_SM5.index(diff)]][0:3]
+
+    top3 = []
+    for s in score:
+        PlayerName = s.get('PlayerName')
+        Score = s.get('Score')
+        top3.append({
+            "PlayerName": PlayerName,
+            "Score": Score,
+        })
+
+    while len(top3) < 3:
+        top3.append({
+            "PlayerName": "",
+            "Score": 0,
+        })
+    return top3
+
+
+def printActiveSongLiveStat(top3):
     os.system("cls")
     stats = readstats()
-    val = stats.get('steps_info').get('W1').value
-    print(val)
+
+    # Parsing
+    song_info = stats.get("song_info")
+    steps_info = stats.get("steps_info")
+    current_score = stats.get("score").value
+
+    progress = stats.get("progress").value
+
+    name = song_info.get("name").value
+    artist = song_info.get("artist").value
+    difficulty = song_info.get("difficulty").value
+    W1 = steps_info.get("W1").value
+    W2 = steps_info.get("W2").value
+    W3 = steps_info.get("W3").value
+    NG = steps_info.get("NG").value
+    OK = steps_info.get("OK").value
+    Miss = steps_info.get("Miss").value
+    W5 = steps_info.get("W5").value
+    W4 = steps_info.get("W4").value
+    difficulty_name = song_info.get("difficulty_name").value
+    diff_idx = DIFF_TABLE_SM5.index(difficulty_name)
+    top3 = top3[:]
+
+    you_index = -1
+    for idx in range(len(top3)):
+        score = top3[idx].get('Score')
+        if int(current_score) >= int(score):
+            top3.insert(idx, {
+                'PlayerName': "You",
+                'Score': int(current_score)
+            })
+            you_index = idx
+            break
+    else:
+        top3.append({
+            'PlayerName': "You",
+            'Score': score
+        })
+    
+    def get_prefix_color(idx, you_index):
+        if idx == you_index:
+            return Fore.YELLOW
+        return ""
+
+    print(
+        f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{int(float(progress)*100)}%{Fore.RESET}] {Fore.RESET}{name}")
+    print(f"{Fore.LIGHTBLACK_EX}{artist}")
+    print(f"{DIFF_TABLE_COLOR[diff_idx]}{DIFF_TABLE[diff_idx]} {difficulty}")
+    print(f"{Fore.RESET}{'':<14}{'':<4}Highscore:")
+    print(
+        f"{Fore.WHITE}{W1:<3} {'Marvelous':<10}    {Fore.RESET}1. {get_prefix_color(0, you_index)}{top3[0].get('PlayerName'):<8} {top3[0].get('Score'):,}")
+    print(
+        f"{Fore.YELLOW}{W2:<3} {'Perfect':<10}    {Fore.RESET}2. {get_prefix_color(1, you_index)}{top3[1].get('PlayerName'):<8} {top3[1].get('Score'):,}")
+    print(
+        f"{Fore.GREEN}{W3:<3} {'Great':<10}    {Fore.RESET}3. {get_prefix_color(2, you_index)}{top3[2].get('PlayerName'):<8} {top3[2].get('Score'):,}")
+    print(
+        f"{Fore.LIGHTBLUE_EX}{W4:<3} {'Good':<10}    {Fore.RESET}4. {top3[3].get('PlayerName'):<8} {top3[3].get('Score'):,}")
+    print(f"{Fore.MAGENTA}{W5:<3} {'Almost':<10}")
+    print(f"{Fore.RESET}{OK:<3} {'OK':<10}")
+    print(f"{Fore.LIGHTBLACK_EX}{NG:<3} {'NG':<10}")
+    print(f"{Fore.RED}{Miss:<3} {'Miss':<10}")
+    print(Fore.RESET)
 
 
 def submitScore():
@@ -198,11 +295,13 @@ if __name__ == "__main__":
 
     print("\nLoading...")
     # DEV: Change back in release
-    # time.sleep(5)    
+    # time.sleep(5)
 
     # Main loop
     ingame = "true"
     song_name = ""
+    top3 = getTop3Score(readstats().get(
+        "song_info").get("difficulty_name").value)
     printActiveSong()
     while True:
         stats = readstats()
@@ -217,24 +316,11 @@ if __name__ == "__main__":
             if song_name != __song_name:
                 song_name = __song_name
                 printActiveSong()
-        else:
-            printActiveSongLiveStat()
-        
+        elif __ingame == 'true':
+            if ingame == 'false':
+                top3 = getTop3Score(
+                    stats.get("song_info").get("difficulty_name").value)
+            printActiveSongLiveStat(top3)
+
         ingame = __ingame
-        time.sleep(0.5)
-
-
-# os.system("cls")
-# print("Waiting for stepmania...")
-# last_cur_song = ""
-# last_ts = ""
-# while(True):
-#     if getCurTimestamp() != last_ts:
-#         last_ts = getCurTimestamp()
-#         os.system(SUBMIT_SCORE_BAT_PATH)
-#         last_cur_song = printActiveSong()
-
-#     if getCurSong() != last_cur_song:
-#         last_cur_song = printActiveSong()
-
-#     time.sleep(1)
+        time.sleep(1)
