@@ -16,10 +16,34 @@
     <style>
         * {
             font-family: 'Anek Latin', sans-serif;
+            background-color: black;
+            color: white;
+            border-color: grey !important;
         }
 
-        table.dataTable thead tr {
-            background-color: white;
+        table.dataTable thead tr th {
+            background-color: #1c1a1a !important;
+        }
+
+        /* Custom scrollbar */
+        /* width */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
     </style>
 </head>
