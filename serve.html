@@ -271,7 +271,24 @@
                         {
                             data: "PercentDP",
                             render: function (renderData, type, row) {
-                                return (Number(renderData) * 100).toFixed(2) + " %"
+                                const formatPercentDP = (pdp) => (Number(pdp) * 100).toFixed(2) + " %"
+                                let comparePlayer = $("select[name=comparePlayerSelect]").val()
+                                if (comparePlayer === "-") {
+                                    return renderData;
+                                }
+
+                                let target = data.find(x =>
+                                    x.SongName === row.SongName && x.Difficulty === row.Difficulty && x.PlayerName === comparePlayer
+                                )
+                                if (typeof target === 'undefined') {
+                                    return renderData;
+                                }
+
+                                let precent_diff = row.PercentDP - target.PercentDP
+                                if (row.PlayerName === comparePlayer) {
+                                    precent_diff = 0
+                                }
+                                return formatPercentDP(renderData) + `<br /><span style="color:${precent_diff >= 0 ? "green" : "red"}">${precent_diff >= 0 ? "+" : ""}${formatPercentDP(precent_diff)}</span>`
                             }
                         },
                         { data: "MaxCombo" },
