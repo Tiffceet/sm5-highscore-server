@@ -15,7 +15,7 @@ DIFF_TABLE_SM5 = [
     "Easy",
     "Medium",
     "Hard",
-    "Challenge"
+    "Challenge",
     "Edit"
 ]
 DIFF_TABLE = [
@@ -62,7 +62,7 @@ class CustomParser:
 # Command line arguments
 PROFILE_NAME = ""
 SCORE_TYPE = "controller"
-HOST = "http://localhost:8765"
+HOST = "http://looz.servehttp.com:3001"
 
 if len(sys.argv) >= 2:
     PROFILE_NAME = sys.argv[1]
@@ -124,12 +124,11 @@ def printScore(score):
 def getCurSong():
     with open(EVERYONE_DANCE, "r") as f:
         lines = f.readlines()
-        song_name = ""
-        for line in lines:
-            if line.startswith('song_info:name:'):
-                song_name = line[15:].strip("\n")
-                break
-        return song_name
+        data = CustomParser(lines)
+        song_dir = data.get("song_info").get("song_dir").value
+        song_dir = song_dir[:-1]
+        song_dir = song_dir[song_dir.rfind("/")+1:]
+        return song_dir
 
 
 def getScoresByName(song_name):
@@ -191,7 +190,8 @@ def getTop3Score(diff):
             "PlayerName": "",
             "Score": 0,
         })
-    return top3
+
+    return sorted(top3, key=itemgetter('Score'), reverse=True)
 
 
 def printActiveSongLiveStat(top3):
@@ -235,7 +235,7 @@ def printActiveSongLiveStat(top3):
             'PlayerName': "You",
             'Score': score
         })
-    
+
     def get_prefix_color(idx, you_index):
         if idx == you_index:
             return Fore.YELLOW
@@ -294,8 +294,7 @@ if __name__ == "__main__":
     print("HOST: " + HOST)
 
     print("\nLoading...")
-    # DEV: Change back in release
-    # time.sleep(5)
+    time.sleep(5)
 
     # Main loop
     ingame = "true"
@@ -304,23 +303,29 @@ if __name__ == "__main__":
         "song_info").get("difficulty_name").value)
     printActiveSong()
     while True:
-        stats = readstats()
-        __ingame = stats.get("ingame").value
-        if __ingame == 'false':
-            if ingame == 'true':
-                os.system("cls")
-                print("Submitting score...")
-                submitScore()
-                printActiveSong()
-            __song_name = getCurSong()
-            if song_name != __song_name:
-                song_name = __song_name
-                printActiveSong()
-        elif __ingame == 'true':
-            if ingame == 'false':
-                top3 = getTop3Score(
-                    stats.get("song_info").get("difficulty_name").value)
-            printActiveSongLiveStat(top3)
+        try:
+            stats = readstats()
+            __ingame = stats.get("ingame").value
+            if __ingame == 'false':
+                if ingame == 'true':
+                    os.system("cls")
+                    print("Submitting score...")
+                    submitScore()
+                    printActiveSong()
+                __song_name = getCurSong()
+                if song_name != __song_name:
+                    song_name = __song_name
+                    printActiveSong()
+            elif __ingame == 'true':
+                if ingame == 'false':
+                    top3 = getTop3Score(
+                        stats.get("song_info").get("difficulty_name").value)
+                printActiveSongLiveStat(top3)
 
-        ingame = __ingame
-        time.sleep(1)
+            ingame = __ingame
+            time.sleep(1)
+        except KeyboardInterrupt:
+            exit(0)
+        except:
+            print("Unknown error")
+            continue
