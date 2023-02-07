@@ -121,6 +121,12 @@ def printScore(score):
         rank_counts += 1
 
 
+def formatPTNS(score, sep="|"):
+    if score is None:
+        return ""
+    return Fore.LIGHTWHITE_EX + str(score["Marvelous"]) + sep + Fore.YELLOW + str(score["Perfect"]) + sep + Fore.GREEN + str(score["Great"]) + sep + Fore.CYAN + str(score["Good"]) + sep + Fore.RED + str(score["Miss"]) + Fore.RESET
+
+
 def getCurSong():
     with open(EVERYONE_DANCE, "r") as f:
         lines = f.readlines()
@@ -183,12 +189,14 @@ def getTop3Score(diff):
         top3.append({
             "PlayerName": PlayerName,
             "Score": Score,
+            "raw": s
         })
 
     while len(top3) < 3:
         top3.append({
             "PlayerName": "",
             "Score": 0,
+            "raw": None
         })
 
     return sorted(top3, key=itemgetter('Score'), reverse=True)
@@ -226,14 +234,16 @@ def printActiveSongLiveStat(top3):
         if int(current_score) >= int(score):
             top3.insert(idx, {
                 'PlayerName': "You",
-                'Score': int(current_score)
+                'Score': int(current_score),
+                'raw': None
             })
             you_index = idx
             break
     else:
         top3.append({
             'PlayerName': "You",
-            'Score': score
+            'Score': score,
+            'raw': None
         })
 
     def get_prefix_color(idx, you_index):
@@ -247,13 +257,13 @@ def printActiveSongLiveStat(top3):
     print(f"{DIFF_TABLE_COLOR[diff_idx]}{DIFF_TABLE[diff_idx]} {difficulty}")
     print(f"{Fore.RESET}{'':<14}{'':<4}Highscore:")
     print(
-        f"{Fore.WHITE}{W1:<3} {'Marvelous':<10}    {Fore.RESET}1. {get_prefix_color(0, you_index)}{top3[0].get('PlayerName'):<8} {top3[0].get('Score'):,}")
+        f"{Fore.WHITE}{W1:<3} {'Marvelous':<10}    {Fore.RESET}1. {get_prefix_color(0, you_index)}{top3[0].get('PlayerName'):<8} {top3[0].get('Score'):,} {formatPTNS(top3[0]['raw'])}")
     print(
-        f"{Fore.YELLOW}{W2:<3} {'Perfect':<10}    {Fore.RESET}2. {get_prefix_color(1, you_index)}{top3[1].get('PlayerName'):<8} {top3[1].get('Score'):,}")
+        f"{Fore.YELLOW}{W2:<3} {'Perfect':<10}    {Fore.RESET}2. {get_prefix_color(1, you_index)}{top3[1].get('PlayerName'):<8} {top3[1].get('Score'):,} {formatPTNS(top3[1]['raw'])}")
     print(
-        f"{Fore.GREEN}{W3:<3} {'Great':<10}    {Fore.RESET}3. {get_prefix_color(2, you_index)}{top3[2].get('PlayerName'):<8} {top3[2].get('Score'):,}")
+        f"{Fore.GREEN}{W3:<3} {'Great':<10}    {Fore.RESET}3. {get_prefix_color(2, you_index)}{top3[2].get('PlayerName'):<8} {top3[2].get('Score'):,} {formatPTNS(top3[2]['raw'])}")
     print(
-        f"{Fore.LIGHTBLUE_EX}{W4:<3} {'Good':<10}    {Fore.RESET}4. {top3[3].get('PlayerName'):<8} {top3[3].get('Score'):,}")
+        f"{Fore.LIGHTBLUE_EX}{W4:<3} {'Good':<10}    {Fore.RESET}4. {top3[3].get('PlayerName'):<8} {top3[3].get('Score'):,} {formatPTNS(top3[3]['raw'])}")
     print(f"{Fore.MAGENTA}{W5:<3} {'Almost':<10}")
     print(f"{Fore.RESET}{OK:<3} {'OK':<10}")
     print(f"{Fore.LIGHTBLACK_EX}{NG:<3} {'NG':<10}")
