@@ -128,7 +128,7 @@ def formatPTNS(score, sep="|"):
 
 
 def getCurSong():
-    with open(EVERYONE_DANCE, "r") as f:
+    with open(EVERYONE_DANCE, "r", encoding='utf8') as f:
         lines = f.readlines()
         data = CustomParser(lines)
         song_dir = data.get("song_info").get("song_dir").value
@@ -292,7 +292,7 @@ def submitScore():
 
 
 def readstats():
-    with open(EVERYONE_DANCE, "r") as f:
+    with open(EVERYONE_DANCE, "r", encoding="utf8") as f:
         data = f.readlines()
         stats = CustomParser(data)
         return stats
