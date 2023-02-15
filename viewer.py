@@ -23,14 +23,16 @@ DIFF_TABLE = [
     "Basic",
     "Difficult",
     "Expert",
-    "Challenge"
+    "Challenge",
+    "Edit"
 ]
 DIFF_TABLE_COLOR = [
     Fore.CYAN,
     Fore.YELLOW,
     Fore.RED,
     Fore.GREEN,
-    Fore.MAGENTA
+    Fore.MAGENTA,
+    Fore.LIGHTBLACK_EX
 ]
 EVERYONE_DANCE_PATH = os.path.join(
     os.getenv("appdata"), "StepMania 5", "Save")
