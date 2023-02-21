@@ -1,0 +1,13 @@
+version: "3.9" # optional since v1.27.0
+services:
+  web:
+    build: .
+    ports:
+      - "3001:3001"
+    volumes:
+      - scores:/app/scores
+      - backup:/app/_backup
+    restart: "always"
+volumes:
+  scores:
+  backup:
