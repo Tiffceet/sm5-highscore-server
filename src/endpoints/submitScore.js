@@ -66,6 +66,7 @@ const parseSong = (song_obj) => {
 
 const parseDiff = (diff_obj) => {
     let { Difficulty } = diff_obj.$;
+    let NumTimesPlayed = diff_obj.HighScoreList[0].NumTimesPlayed[0];
     let top_score = diff_obj.HighScoreList[0].HighScore[0];
 
     let DateTime = top_score.DateTime[0];
@@ -101,6 +102,7 @@ const parseDiff = (diff_obj) => {
         TapNoteScores,
         OK,
         FCType,
+        NumTimesPlayed
     };
 };
 

@@ -1,343 +1,417 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Simple SM5 Highscore Server</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"
+        />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https:/cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/fixedheader/3.2.4/js/dataTables.fixedHeader.min.js"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Anek+Latin&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                font-family: "Anek Latin", sans-serif;
+                background-color: black;
+                color: white;
+                border-color: grey !important;
+            }
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple SM5 Highscore Server</title>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https:/cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/fixedheader/3.2.4/js/dataTables.fixedHeader.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anek+Latin&display=swap" rel="stylesheet">
-    <style>
-        * {
-            font-family: 'Anek Latin', sans-serif;
-            background-color: black;
-            color: white;
-            border-color: grey !important;
-        }
+            table.dataTable thead tr th {
+                background-color: #1c1a1a !important;
+            }
 
-        table.dataTable thead tr th {
-            background-color: #1c1a1a !important;
-        }
+            /* Custom scrollbar */
+            /* width */
+            ::-webkit-scrollbar {
+                width: 10px;
+            }
 
-        /* Custom scrollbar */
-        /* width */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
+            /* Track */
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
 
-        /* Track */
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
+            /* Handle */
+            ::-webkit-scrollbar-thumb {
+                background: #888;
+            }
 
-        /* Handle */
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-        }
-
-        /* Handle on hover */
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-    </style>
-</head>
-<button onclick="refetchData()" style="position: fixed; bottom: 0; right: 0; z-index: 9999;">Refresh Score</button>
-<div style="display:grid;grid-template-columns: 1fr 1fr; padding-bottom: 5px">
-    <div style="text-align: left;">
-        <button onclick="refetchData()">Refresh Score</button>
-        <b>Controller Type: </b>
-        <a href="/">All</a> |
-        <a href="/?score_type=pad">Pad</a> |
-        <a href="/?score_type=controller">Controller</a>
+            /* Handle on hover */
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+        </style>
+    </head>
+    <button
+        onclick="refetchData()"
+        style="position: fixed; bottom: 0; right: 0; z-index: 9999"
+    >
+        Refresh Score
+    </button>
+    <div
+        style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding-bottom: 5px;
+        "
+    >
+        <div style="text-align: left">
+            <button onclick="refetchData()">Refresh Score</button>
+            <b>Controller Type: </b>
+            <a href="/">All</a> | <a href="/?score_type=pad">Pad</a> |
+            <a href="/?score_type=controller">Controller</a>
+        </div>
+        <div style="text-align: right">
+            <b>Compare Player: </b>
+            <select
+                name="comparePlayerSelect"
+                onchange="comparePlayerSelectOnChange()"
+            >
+                <option>-</option>
+            </select>
+        </div>
     </div>
-    <div style="text-align: right;">
-        <b>Compare Player: </b>
-        <select name="comparePlayerSelect" onchange="comparePlayerSelectOnChange()">
-            <option>-</option>
-        </select>
-    </div>
-</div>
-<table id="myTable" class="display">
-    <thead>
-        <tr>
-            <th>DateTime</th>
-            <th>PlayerName</th>
-            <th>SongPack</th>
-            <th>SongName</th>
-            <th>Difficulty</th>
-            <th>Grade</th>
-            <th>Score</th>
-            <th>PercentDP</th>
-            <th>MaxCombo</th>
-            <th>Marvelous</th>
-            <th>Perfect</th>
-            <th>Great</th>
-            <th>Good</th>
-            <th>OK</th>
-            <th>Miss</th>
-            <th>N.G.</th>
-            <th>Type</th>
-            <th>Modifiers</th>
-        </tr>
-        <tr>
-            <th>DateTime</th>
-            <th>PlayerName</th>
-            <th>SongPack</th>
-            <th>SongName</th>
-            <th>Difficulty</th>
-            <th>Grade</th>
-            <th>Score</th>
-            <th>PercentDP</th>
-            <th>MaxCombo</th>
-            <th>Marvelous</th>
-            <th>Perfect</th>
-            <th>Great</th>
-            <th>Good</th>
-            <th>OK</th>
-            <th>Miss</th>
-            <th>N.G.</th>
-            <th>Type</th>
-            <th>Modifiers</th>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
+    <table id="myTable" class="display">
+        <thead>
+            <tr>
+                <th>DateTime</th>
+                <th>PlayerName</th>
+                <th>SongPack</th>
+                <th>SongName</th>
+                <th>Difficulty</th>
+                <th>Grade</th>
+                <th>Score</th>
+                <th>PercentDP</th>
+                <th>MaxCombo</th>
+                <th>Marvelous</th>
+                <th>Perfect</th>
+                <th>Great</th>
+                <th>Good</th>
+                <th>OK</th>
+                <th>Miss</th>
+                <th>Play count</th>
+                <th>Type</th>
+                <th>Modifiers</th>
+            </tr>
+            <tr>
+                <th>DateTime</th>
+                <th>PlayerName</th>
+                <th>SongPack</th>
+                <th>SongName</th>
+                <th>Difficulty</th>
+                <th>Grade</th>
+                <th>Score</th>
+                <th>PercentDP</th>
+                <th>MaxCombo</th>
+                <th>Marvelous</th>
+                <th>Perfect</th>
+                <th>Great</th>
+                <th>Good</th>
+                <th>OK</th>
+                <th>Miss</th>
+                <th>Play count</th>
+                <th>Type</th>
+                <th>Modifiers</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-<body>
-</body>
-<script>
-    var score_url = "http://looz.servehttp.com:3001/getScores"
+    <body></body>
+    <script>
+        var score_url = "http://localhost:8765/getScores";
 
-    var score_data = []
+        var score_data = [];
 
-    function findGetParameter(parameterName) {
-        var result = null,
-            tmp = [];
-        location.search
-            .substr(1)
-            .split("&")
-            .forEach(function (item) {
-                tmp = item.split("=");
-                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-            });
-        return result;
-    }
-    const GradeTable = [
-        "⚪",
-        "🟡",
-        "🟢",
-        "🔵",
-        "AAA+",
-        "AAA",
-        "AA+",
-        "AA",
-        "AA-",
-        "A+",
-        "A",
-        "A",
-        "B",
-        "B",
-        "B",
-        "C",
-        "C",
-        "C",
-        "D+",
-        "D",
-    ]
-
-    const DiffColor = {
-        "Beginner": "#23c3fb",
-        "Basic": "#fba020",
-        "Difficult": "#df3746",
-        "Expert": "#24ce17",
-        "Challenge": "#f914fb",
-    }
-
-    function getGradeScore(g) {
-        if (g.includes("Failed")) {
-            return -1
+        function findGetParameter(parameterName) {
+            var result = null,
+                tmp = [];
+            location.search
+                .substr(1)
+                .split("&")
+                .forEach(function (item) {
+                    tmp = item.split("=");
+                    if (tmp[0] === parameterName)
+                        result = decodeURIComponent(tmp[1]);
+                });
+            return result;
         }
-        for (let i = 0; i < GradeTable.length; i++) {
-            if (g.includes(GradeTable[i])) {
-                let score = GradeTable.length - i
-                if (i >= 0 && i <= 3) {
-                    g = g.slice(0, -1)
-                    for (let j = 0; j < GradeTable.length; j++) {
-                        if (g.includes(GradeTable[j])) {
-                            return score + (GradeTable.length - j) / 10
+        const GradeTable = [
+            "⚪",
+            "🟡",
+            "🟢",
+            "🔵",
+            "AAA+",
+            "AAA",
+            "AA+",
+            "AA",
+            "AA-",
+            "A+",
+            "A",
+            "A",
+            "B",
+            "B",
+            "B",
+            "C",
+            "C",
+            "C",
+            "D+",
+            "D",
+        ];
+
+        const DiffColor = {
+            Beginner: "#23c3fb",
+            Basic: "#fba020",
+            Difficult: "#df3746",
+            Expert: "#24ce17",
+            Challenge: "#f914fb",
+        };
+
+        function getGradeScore(g) {
+            if (g.includes("Failed")) {
+                return -1;
+            }
+            for (let i = 0; i < GradeTable.length; i++) {
+                if (g.includes(GradeTable[i])) {
+                    let score = GradeTable.length - i;
+                    if (i >= 0 && i <= 3) {
+                        g = g.slice(0, -1);
+                        for (let j = 0; j < GradeTable.length; j++) {
+                            if (g.includes(GradeTable[j])) {
+                                return score + (GradeTable.length - j) / 10;
+                            }
                         }
                     }
+                    return score;
                 }
-                return score
             }
+            return -1;
         }
-        return -1;
-    }
 
-    function getDifficultyScore(d) {
-        if (d.includes("Beginner")) return 0
-        if (d.includes("Basic")) return 1
-        if (d.includes("Difficult")) return 2
-        if (d.includes("Expert")) return 3
-        if (d.includes("Challenge")) return 4
-        return 99;
-    }
+        function getDifficultyScore(d) {
+            if (d.includes("Beginner")) return 0;
+            if (d.includes("Basic")) return 1;
+            if (d.includes("Difficult")) return 2;
+            if (d.includes("Expert")) return 3;
+            if (d.includes("Challenge")) return 4;
+            return 99;
+        }
 
-    function loadUniquePlayers(data) {
-        let compareArg = findGetParameter("compare")
+        function loadUniquePlayers(data) {
+            let compareArg = findGetParameter("compare");
 
-        let uniquePlayers = {}
-        for (let i = 0; i < data.length; i++) {
-            let playerName = data[i].PlayerName
-            if (typeof uniquePlayers[playerName] === "undefined") {
-                uniquePlayers[playerName] = true;
-                if (playerName === compareArg) {
-                    $("select[name=comparePlayerSelect]").append(`<option selected>${playerName}</option>`)
-                } else {
-                    $("select[name=comparePlayerSelect]").append(`<option>${playerName}</option>`)
+            let uniquePlayers = {};
+            for (let i = 0; i < data.length; i++) {
+                let playerName = data[i].PlayerName;
+                if (typeof uniquePlayers[playerName] === "undefined") {
+                    uniquePlayers[playerName] = true;
+                    if (playerName === compareArg) {
+                        $("select[name=comparePlayerSelect]").append(
+                            `<option selected>${playerName}</option>`
+                        );
+                    } else {
+                        $("select[name=comparePlayerSelect]").append(
+                            `<option>${playerName}</option>`
+                        );
+                    }
                 }
-
             }
         }
-    }
 
-    function comparePlayerSelectOnChange() {
-        $('#myTable').DataTable()
-            .rows().invalidate('data')
-            .draw(false);
-    }
-
-    function refetchData() {
-        $.ajax({
-            url: score_url,
-            success: (data) => {
-                score_data = data
-                let dataTable = $("#myTable").DataTable()
-                dataTable.clear()
-                dataTable.rows.add(score_data)
-                dataTable.draw()
-            }
-        })
-    }
-
-    $.fn.dataTable.ext.type.order['ddrgrade-pre'] = getGradeScore
-    $.fn.dataTable.ext.type.order['ddrdiff-pre'] = getDifficultyScore
-    $(document).ready(function () {
-        // Setup - add a text input to each footer cell
-        $('#myTable thead tr:eq(1) th').each(function () {
-            var title = $(this).text();
-            let sort_these = ["PlayerName", "SongPack", "SongName", "Grade", "Score", "Difficulty", "Modifiers", "Miss", "Good", "Great"]
-            let sort_these_small = ["Miss", "Good", "Great"]
-            $(this).html('<input type="text" style="display: ' + (sort_these.includes(title) ? "block" : "none") + ';width: ' + (sort_these_small.includes(title) ? "32px" : "64px") + '" class="column_search" />');
-        });
-
-        if (findGetParameter("score_type")) {
-            score_url = score_url + "?score_type=" + findGetParameter("score_type")
+        function comparePlayerSelectOnChange() {
+            $("#myTable").DataTable().rows().invalidate("data").draw(false);
         }
 
-        $.ajax({
-            url: score_url,
-            success: (data) => {
-                score_data = data;
-                loadUniquePlayers(score_data);
-                let table = $('#myTable').DataTable({
-                    data: score_data,
-                    orderCellsTop: true,
-                    bPaginate: true,
-                    bLengthChange: false,
-                    order: [[0, 'desc']],
-                    fixedHeader: true,
-                    pageLength: 100,
-                    columns: [
-                        { data: 'DateTime' },
-                        { data: "PlayerName" },
-                        { data: "SongPack" },
-                        { data: "SongName" },
-                        {
-                            data: "Difficulty",
-                            render: function (renderData, type, row) {
-                                return `<b style="color: ${DiffColor[renderData] ? DiffColor[renderData] : "#808080"}">${renderData}</b>`
-                            }
-                        },
-                        { data: "Grade" },
-                        {
-                            data: "Score",
-                            render: function (renderData, type, row) {
-                                let comparePlayer = $("select[name=comparePlayerSelect]").val()
-                                if (comparePlayer === "-") {
-                                    return renderData;
-                                }
+        function refetchData() {
+            $.ajax({
+                url: score_url,
+                success: (data) => {
+                    score_data = data;
+                    let dataTable = $("#myTable").DataTable();
+                    dataTable.clear();
+                    dataTable.rows.add(score_data);
+                    dataTable.draw();
+                },
+            });
+        }
 
-                                let target = score_data.find(x =>
-                                    x.SongName === row.SongName && x.Difficulty === row.Difficulty && x.PlayerName === comparePlayer
-                                )
-                                if (typeof target === 'undefined') {
-                                    return renderData;
-                                }
+        $.fn.dataTable.ext.type.order["ddrgrade-pre"] = getGradeScore;
+        $.fn.dataTable.ext.type.order["ddrdiff-pre"] = getDifficultyScore;
+        $(document).ready(function () {
+            // Setup - add a text input to each footer cell
+            $("#myTable thead tr:eq(1) th").each(function () {
+                var title = $(this).text();
+                let sort_these = [
+                    "PlayerName",
+                    "SongPack",
+                    "SongName",
+                    "Grade",
+                    "Score",
+                    "Difficulty",
+                    "Modifiers",
+                    "Miss",
+                    "Good",
+                    "Great",
+                ];
+                let sort_these_small = ["Miss", "Good", "Great"];
+                $(this).html(
+                    '<input type="text" style="display: ' +
+                        (sort_these.includes(title) ? "block" : "none") +
+                        ";width: " +
+                        (sort_these_small.includes(title) ? "32px" : "64px") +
+                        '" class="column_search" />'
+                );
+            });
 
-                                let score_diff = row.Score - target.Score
-                                if (row.PlayerName === comparePlayer) {
-                                    score_diff = 0
-                                }
-                                return renderData + `<br /><span style="color:${score_diff >= 0 ? "green" : "red"}">${score_diff >= 0 ? "+" : ""}${score_diff}</span>`
-                            }
-                        },
-                        {
-                            data: "PercentDP",
-                            render: function (renderData, type, row) {
-                                const formatPercentDP = (pdp) => (Number(pdp) * 100).toFixed(2) + " %"
-                                let comparePlayer = $("select[name=comparePlayerSelect]").val()
-                                if (comparePlayer === "-") {
-                                    return formatPercentDP(renderData);
-                                }
-
-                                let target = score_data.find(x =>
-                                    x.SongName === row.SongName && x.Difficulty === row.Difficulty && x.PlayerName === comparePlayer
-                                )
-                                if (typeof target === 'undefined') {
-                                    return formatPercentDP(renderData);
-                                }
-
-                                let precent_diff = row.PercentDP - target.PercentDP
-                                if (row.PlayerName === comparePlayer) {
-                                    precent_diff = 0
-                                }
-                                return formatPercentDP(renderData) + `<br /><span style="color:${precent_diff >= 0 ? "green" : "red"}">${precent_diff >= 0 ? "+" : ""}${formatPercentDP(precent_diff)}</span>`
-                            }
-                        },
-                        { data: "MaxCombo" },
-                        { data: "Marvelous" },
-                        { data: "Perfect" },
-                        { data: "Great" },
-                        { data: "Good" },
-                        { data: "OK" },
-                        { data: "Miss" },
-                        { data: "NG" },
-                        { data: "Type" },
-                        { data: "Modifiers" },
-                    ],
-                    "columnDefs": [
-                        { type: "ddrdiff", targets: 4 },
-                        { type: "ddrgrade", targets: 5 }
-                    ]
-                });
-                // Apply the search
-                $('#myTable thead').on('keyup', ".column_search", function () {
-                    table
-                        .column($(this).parent().index())
-                        .search(this.value)
-                        .draw();
-                });
+            if (findGetParameter("score_type")) {
+                score_url =
+                    score_url + "?score_type=" + findGetParameter("score_type");
             }
-        });
-    });
-</script>
 
+            $.ajax({
+                url: score_url,
+                success: (data) => {
+                    score_data = data;
+                    loadUniquePlayers(score_data);
+                    score_data.forEach((score) => {
+                        score.NumTimesPlayed = score.NumTimesPlayed ?? "-";
+                    });
+                    let table = $("#myTable").DataTable({
+                        data: score_data,
+                        orderCellsTop: true,
+                        bPaginate: true,
+                        bLengthChange: false,
+                        order: [[0, "desc"]],
+                        fixedHeader: true,
+                        pageLength: 100,
+                        columns: [
+                            { data: "DateTime" },
+                            { data: "PlayerName" },
+                            { data: "SongPack" },
+                            { data: "SongName" },
+                            {
+                                data: "Difficulty",
+                                render: function (renderData, type, row) {
+                                    return `<b style="color: ${
+                                        DiffColor[renderData]
+                                            ? DiffColor[renderData]
+                                            : "#808080"
+                                    }">${renderData}</b>`;
+                                },
+                            },
+                            { data: "Grade" },
+                            {
+                                data: "Score",
+                                render: function (renderData, type, row) {
+                                    let comparePlayer = $(
+                                        "select[name=comparePlayerSelect]"
+                                    ).val();
+                                    if (comparePlayer === "-") {
+                                        return renderData;
+                                    }
+
+                                    let target = score_data.find(
+                                        (x) =>
+                                            x.SongName === row.SongName &&
+                                            x.Difficulty === row.Difficulty &&
+                                            x.PlayerName === comparePlayer
+                                    );
+                                    if (typeof target === "undefined") {
+                                        return renderData;
+                                    }
+
+                                    let score_diff = row.Score - target.Score;
+                                    if (row.PlayerName === comparePlayer) {
+                                        score_diff = 0;
+                                    }
+                                    return (
+                                        renderData +
+                                        `<br /><span style="color:${
+                                            score_diff >= 0 ? "green" : "red"
+                                        }">${
+                                            score_diff >= 0 ? "+" : ""
+                                        }${score_diff}</span>`
+                                    );
+                                },
+                            },
+                            {
+                                data: "PercentDP",
+                                render: function (renderData, type, row) {
+                                    const formatPercentDP = (pdp) =>
+                                        (Number(pdp) * 100).toFixed(2) + " %";
+                                    let comparePlayer = $(
+                                        "select[name=comparePlayerSelect]"
+                                    ).val();
+                                    if (comparePlayer === "-") {
+                                        return formatPercentDP(renderData);
+                                    }
+
+                                    let target = score_data.find(
+                                        (x) =>
+                                            x.SongName === row.SongName &&
+                                            x.Difficulty === row.Difficulty &&
+                                            x.PlayerName === comparePlayer
+                                    );
+                                    if (typeof target === "undefined") {
+                                        return formatPercentDP(renderData);
+                                    }
+
+                                    let precent_diff =
+                                        row.PercentDP - target.PercentDP;
+                                    if (row.PlayerName === comparePlayer) {
+                                        precent_diff = 0;
+                                    }
+                                    return (
+                                        formatPercentDP(renderData) +
+                                        `<br /><span style="color:${
+                                            precent_diff >= 0 ? "green" : "red"
+                                        }">${
+                                            precent_diff >= 0 ? "+" : ""
+                                        }${formatPercentDP(
+                                            precent_diff
+                                        )}</span>`
+                                    );
+                                },
+                            },
+                            { data: "MaxCombo" },
+                            { data: "Marvelous" },
+                            { data: "Perfect" },
+                            { data: "Great" },
+                            { data: "Good" },
+                            { data: "OK" },
+                            { data: "Miss" },
+                            { data: "NumTimesPlayed" },
+                            { data: "Type" },
+                            { data: "Modifiers" },
+                        ],
+                        columnDefs: [
+                            { type: "ddrdiff", targets: 4 },
+                            { type: "ddrgrade", targets: 5 },
+                        ],
+                    });
+                    // Apply the search
+                    $("#myTable thead").on(
+                        "keyup",
+                        ".column_search",
+                        function () {
+                            table
+                                .column($(this).parent().index())
+                                .search(this.value)
+                                .draw();
+                        }
+                    );
+                },
+            });
+        });
+    </script>
 </html>
