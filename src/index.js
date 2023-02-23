@@ -1,5 +1,6 @@
 import * as cors from "cors";
 import * as endpoints from "./endpoints/index.js";
+import * as fs from "fs";
 import express from "express";
 import { dirname } from "./globals.js";
 import bodyParser from "body-parser";
@@ -13,7 +14,25 @@ app.use(cors.default());
 app.use(favicon.default(dirname + "favicon.ico"));
 
 app.get("/", function (req, res) {
-    res.sendFile(dirname + "/serve.html");
+    fs.readFile(dirname + "/serve.html", function (err, data) {
+        if (err) {
+            res.send(404);
+        } else {
+            res.contentType("text/html");
+
+            data = Buffer.from(
+                data
+                    .toString()
+                    .replace(
+                        /\{\{HOST\}\}/g,
+                        process.env.HOST ?? "localhost:8765"
+                    )
+            );
+
+            res.send(data);
+        }
+    });
+    // res.sendFile(dirname + "/serve.html");
 });
 
 Object.entries(endpoints).forEach(([_, { method, endpoint, handler }]) => {
