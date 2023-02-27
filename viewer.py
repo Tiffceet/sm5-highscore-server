@@ -254,11 +254,25 @@ def printActiveSongLiveStat(top3):
             return Fore.YELLOW
         return ""
 
+    # Attempt to simulate DDR A style subtractive scoring by comparing miss counts from top score and current
+    missDiffMFC = "-"
+    missDiffPFC = "-"
+    if top3[0]["raw"] is not None:
+        MissCountPFC = int(W3) + int(Miss) + int(W4) + int(W5)    
+        MissCountHighestScorePFC = int(top3[0]["raw"]["Great"]) + int(top3[0]["raw"]["Good"]) + int(top3[0]["raw"]["Miss"])
+        missDiffPFC = MissCountHighestScorePFC - MissCountPFC
+        missDiffPFC = Fore.LIGHTGREEN_EX + "+" + str(missDiffPFC) if missDiffPFC > 0 else Fore.RED + str(missDiffPFC)
+
+        MissCountMFC = int(W2) + int(W3) + int(Miss) + int(W4) + int(W5)    
+        MissCountHighestScoreMFC = int(top3[0]["raw"]["Perfect"]) + int(top3[0]["raw"]["Great"]) + int(top3[0]["raw"]["Good"]) + int(top3[0]["raw"]["Miss"])
+        missDiffMFC = MissCountHighestScoreMFC - MissCountMFC
+        missDiffMFC = Fore.LIGHTGREEN_EX + "+" + str(missDiffMFC) if missDiffMFC > 0 else Fore.RED + str(missDiffMFC)
+
     print(
         f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{int(float(progress)*100)}%{Fore.RESET}] {Fore.RESET}{name}")
     print(f"{Fore.LIGHTBLACK_EX}{artist}")
     print(f"{DIFF_TABLE_COLOR[diff_idx]}{DIFF_TABLE[diff_idx]} {difficulty}")
-    print(f"{Fore.RESET}{'':<14}{'':<4}Highscore:")
+    print(f"{Fore.RESET}{f'':<14}{'':<4}Highscore:")
     print(
         f"{Fore.WHITE}{W1:<3} {'Marvelous':<10}    {Fore.RESET}1. {get_prefix_color(0, you_index)}{top3[0].get('PlayerName'):<8} {top3[0].get('Score'):,} {formatPTNS(top3[0]['raw'])}")
     print(
@@ -271,7 +285,9 @@ def printActiveSongLiveStat(top3):
     print(f"{Fore.RESET}{OK:<3} {'OK':<10}")
     print(f"{Fore.LIGHTBLACK_EX}{NG:<3} {'NG':<10}")
     print(f"{Fore.RED}{Miss:<3} {'Miss':<10}")
-    print(Fore.RESET)
+    print("\n")
+    print(f"{Fore.WHITE}M: {Fore.RESET}{missDiffMFC}")
+    print(f"{Fore.YELLOW}P: {Fore.RESET}{missDiffPFC}")
 
 
 def submitScore():
@@ -341,6 +357,6 @@ if __name__ == "__main__":
             time.sleep(1)
         except KeyboardInterrupt:
             exit(0)
-        except:
-            print("Unknown error")
+        except Exception as e:
+            print(e, file=sys.stderr)
             continue
