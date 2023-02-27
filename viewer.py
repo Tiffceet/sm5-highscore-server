@@ -136,7 +136,8 @@ def getCurSong():
         song_dir = data.get("song_info").get("song_dir").value
         song_dir = song_dir[:-1]
         song_dir = song_dir[song_dir.rfind("/")+1:]
-        return song_dir
+        song_pack = data.get("song_info").get("pack").value
+        return song_dir, song_pack
 
 
 def getScoresByName(song_name):
@@ -154,7 +155,7 @@ def getScoresByName(song_name):
 
 
 def printActiveSong():
-    song_name = getCurSong()
+    song_name, song_pack = getCurSong()
     os.system("cls")
 
     data = getScoresByName(song_name)
@@ -168,7 +169,7 @@ def printActiveSong():
             "Beginner" and i["Difficulty"] != "Basic" and i["Difficulty"] != "Difficult" and i["Difficulty"] != "Expert"]
 
     print("Song: " + song_name)
-    print("")
+    print(Fore.LIGHTYELLOW_EX + "Pack: " + song_pack + Fore.RESET)
     printScore(beg)
     printScore(bas)
     printScore(dif)
@@ -179,7 +180,7 @@ def printActiveSong():
 
 
 def getTop3Score(diff):
-    song_name = getCurSong()
+    song_name, _ = getCurSong()
     data = getScoresByName(song_name)
     score = [i for i in data if i["Difficulty"] ==
              DIFF_TABLE[DIFF_TABLE_SM5.index(diff)]][0:3]
@@ -324,7 +325,7 @@ if __name__ == "__main__":
                     print("Submitting score...")
                     submitScore()
                     printActiveSong()
-                __song_name = getCurSong()
+                __song_name, __song_pack = getCurSong()
                 if song_name != __song_name:
                     song_name = __song_name
                     printActiveSong()
