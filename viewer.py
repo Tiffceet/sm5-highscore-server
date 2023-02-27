@@ -288,6 +288,7 @@ def printActiveSongLiveStat(top3):
     print("\n")
     print(f"{Fore.WHITE}M: {Fore.RESET}{missDiffMFC}")
     print(f"{Fore.YELLOW}P: {Fore.RESET}{missDiffPFC}")
+    print(Fore.RESET)
 
 
 def submitScore():
