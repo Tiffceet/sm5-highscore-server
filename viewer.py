@@ -312,6 +312,7 @@ if __name__ == "__main__":
     # Main loop
     ingame = "true"
     song_name = ""
+    song_pack = ""
     top3 = getTop3Score(readstats().get(
         "song_info").get("difficulty_name").value)
     printActiveSong()
@@ -326,8 +327,9 @@ if __name__ == "__main__":
                     submitScore()
                     printActiveSong()
                 __song_name, __song_pack = getCurSong()
-                if song_name != __song_name:
+                if song_name != __song_name or song_pack != __song_pack:
                     song_name = __song_name
+                    song_pack = __song_pack
                     printActiveSong()
             elif __ingame == 'true':
                 if ingame == 'false':
