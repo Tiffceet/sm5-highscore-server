@@ -237,6 +237,9 @@
                 url: score_url,
                 success: (data) => {
                     score_data = data;
+                    score_data.forEach((score) => {
+                        score.NumTimesPlayed = score.NumTimesPlayed ?? "-";
+                    });
                     let dataTable = $("#myTable").DataTable();
                     dataTable.clear();
                     dataTable.rows.add(score_data);
