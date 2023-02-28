@@ -135,7 +135,7 @@ const convertScoreIntoDataRow = (
                         Good: diff.TapNoteScores.W4,
                         OK: diff.OK,
                         Miss: diff.TapNoteScores.Miss,
-                        // NG: typeof diff.NG === "number" ? diff.NG : "-",
+                        NG: typeof diff.NG === "number" ? diff.NG : "-",
                         NumTimesPlayed: diff.NumTimesPlayed,
                         Type: score_type,
                         Modifiers: diff.Modifiers.join(", "),
