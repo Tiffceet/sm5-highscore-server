@@ -7,6 +7,7 @@ from operator import itemgetter
 from colorama import Fore, Back, Style
 from datetime import datetime
 from xml.dom import minidom
+import re
 colorama.init()
 
 # Globals
@@ -79,6 +80,14 @@ FC_TABLE = ["🔵", "🟢", "🟡", "⚪"]
 FC_TABLE_COLOR = [Fore.CYAN, Fore.GREEN, Fore.YELLOW, Fore.LIGHTWHITE_EX]
 
 
+def extractSpeedModifier(modifiers_string):
+    pattern = re.compile(".*\..*x|C.*")
+    for mod in list(map(lambda x: x.strip(), modifiers_string.split(","))):
+        if pattern.match(mod):
+            return mod
+    return "1x"
+
+
 def printScore(score):
     if len(score) == 0:
         return
@@ -116,7 +125,8 @@ def printScore(score):
         sep = Fore.RESET + "|"
         ptns = Fore.LIGHTWHITE_EX + str(score[x]["Marvelous"]) + sep + Fore.YELLOW + str(score[x]["Perfect"]) + sep + Fore.GREEN + str(
             score[x]["Great"]) + sep + Fore.CYAN + str(score[x]["Good"]) + sep + Fore.RED + str(score[x]["Miss"]) + Fore.RESET
-        pmods = score[x]["Modifiers"].split(",")[0].strip()
+        # pmods = score[x]["Modifiers"].split(",")[0].strip()
+        pmods = extractSpeedModifier(score[x]["Modifiers"])
         print("{:<3} {:<10} {:,} {} {} {}".format(
             pdatetime, pname, pscore, pgrade, ptns, pmods))
         ranking += 1
@@ -258,15 +268,19 @@ def printActiveSongLiveStat(top3):
     missDiffMFC = "-"
     missDiffPFC = "-"
     if top3[0]["raw"] is not None:
-        MissCountPFC = int(W3) + int(Miss) + int(W4) + int(W5)    
-        MissCountHighestScorePFC = int(top3[0]["raw"]["Great"]) + int(top3[0]["raw"]["Good"]) + int(top3[0]["raw"]["Miss"])
+        MissCountPFC = int(W3) + int(Miss) + int(W4) + int(W5)
+        MissCountHighestScorePFC = int(
+            top3[0]["raw"]["Great"]) + int(top3[0]["raw"]["Good"]) + int(top3[0]["raw"]["Miss"])
         missDiffPFC = MissCountHighestScorePFC - MissCountPFC
-        missDiffPFC = Fore.LIGHTGREEN_EX + "+" + str(missDiffPFC) if missDiffPFC > 0 else Fore.RED + str(missDiffPFC)
+        missDiffPFC = Fore.LIGHTGREEN_EX + "+" + \
+            str(missDiffPFC) if missDiffPFC > 0 else Fore.RED + str(missDiffPFC)
 
-        MissCountMFC = int(W2) + int(W3) + int(Miss) + int(W4) + int(W5)    
-        MissCountHighestScoreMFC = int(top3[0]["raw"]["Perfect"]) + int(top3[0]["raw"]["Great"]) + int(top3[0]["raw"]["Good"]) + int(top3[0]["raw"]["Miss"])
+        MissCountMFC = int(W2) + int(W3) + int(Miss) + int(W4) + int(W5)
+        MissCountHighestScoreMFC = int(top3[0]["raw"]["Perfect"]) + int(
+            top3[0]["raw"]["Great"]) + int(top3[0]["raw"]["Good"]) + int(top3[0]["raw"]["Miss"])
         missDiffMFC = MissCountHighestScoreMFC - MissCountMFC
-        missDiffMFC = Fore.LIGHTGREEN_EX + "+" + str(missDiffMFC) if missDiffMFC > 0 else Fore.RED + str(missDiffMFC)
+        missDiffMFC = Fore.LIGHTGREEN_EX + "+" + \
+            str(missDiffMFC) if missDiffMFC > 0 else Fore.RED + str(missDiffMFC)
 
     print(
         f"{Fore.RESET}[{Fore.LIGHTBLACK_EX}{int(float(progress)*100)}%{Fore.RESET}] {Fore.RESET}{name}")
