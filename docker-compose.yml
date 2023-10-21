@@ -1,13 +1,31 @@
 version: "3.9" # optional since v1.27.0
 services:
   web:
-    build: .
+    container_name: sm5-web
+    image: ghcr.io/tiffceet/sm5-highscore-server:master
     ports:
-      - "3001:3001"
+      - "3000:3000"
+    env_file:
+      - .env
     volumes:
       - scores:/app/scores
       - backup:/app/_backup
     restart: "always"
+  jandapress:
+    container_name: jandapress
+    image: ghcr.io/sinkaroid/jandapress:latest
+    ports:
+      - "8000:3000"
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 30
+    environment:
+      - REPO_USER=
+      - REPO_PASSWORD=
 volumes:
   scores:
   backup:
