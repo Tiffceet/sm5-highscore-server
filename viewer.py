@@ -8,7 +8,11 @@ from colorama import Fore, Back, Style
 from datetime import datetime
 from xml.dom import minidom
 import re
+from datetime import datetime
+import traceback
 colorama.init()
+
+debug_mode = False
 
 # Globals
 DIFF_TABLE_SM5 = [
@@ -78,6 +82,15 @@ if len(sys.argv) >= 4:
 
 FC_TABLE = ["🔵", "🟢", "🟡", "⚪"]
 FC_TABLE_COLOR = [Fore.CYAN, Fore.GREEN, Fore.YELLOW, Fore.LIGHTWHITE_EX]
+
+
+def log(message):
+  if not debug_mode:
+      return
+  with open("logs.txt", "a") as f:
+      f.write(f'[{datetime.now()}] ')
+      f.write(message)
+      f.write("\n")
 
 
 def extractSpeedModifier(modifiers_string):
@@ -321,7 +334,9 @@ def submitScore():
         print(f"Cannot get PROFILE_NAME ({PROFILE_NAME})")
         return
 
+    log("Running os.system: " + f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
     os.system(f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
+    log("Done running os.system")
     pass
 
 
@@ -348,20 +363,31 @@ if __name__ == "__main__":
         "song_info").get("difficulty_name").value)
     printActiveSong()
     while True:
+        log("Looping...")
         try:
+            log("Reading stats...")
             stats = readstats()
+            log("Done reading stats.")
             __ingame = stats.get("ingame").value
             if __ingame == 'false':
                 if ingame == 'true':
+                    log("Clearing screen...")
                     os.system("cls")
+                    log("Screen cleared")
                     print("Submitting score...")
+                    log("Submitting score...")
                     submitScore()
+                    log("Score submitted")
+                    log("Printing active song...")
                     printActiveSong()
+                    log("Done printing active song")
                 __song_name, __song_pack = getCurSong()
                 if song_name != __song_name or song_pack != __song_pack:
                     song_name = __song_name
                     song_pack = __song_pack
+                    log("Printing active song...")
                     printActiveSong()
+                    log("Done printing active song")
             elif __ingame == 'true':
                 if ingame == 'false':
                     top3 = getTop3Score(
@@ -373,5 +399,8 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             exit(0)
         except Exception as e:
+            log("An error occured:")
+            log(str(e))
+            log(traceback.format_exc())
             print(e, file=sys.stderr)
             continue
