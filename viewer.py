@@ -257,10 +257,10 @@ def printActiveSongLiveStat(top3):
     you_index = -1
     for idx in range(len(top3)):
         score = top3[idx].get('Score')
-        if int(current_score) >= int(score):
+        if int(float(current_score)) >= int(float(score)):
             top3.insert(idx, {
                 'PlayerName': "You",
-                'Score': int(current_score),
+                'Score': int(float(current_score)),
                 'raw': None
             })
             you_index = idx
