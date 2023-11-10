@@ -344,11 +344,13 @@ def submitScore():
         print(f"Cannot get PROFILE_NAME ({PROFILE_NAME})")
         return
 
-    log("Running os.system: " +
-        f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
-    os.system(f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
-    log("Done running os.system")
-    pass
+    with open(os.path.join(stat_path, 'Stats.xml')) as f:
+        headers = {'Content-Type': 'text/plain; charset=UTF-8'}
+        log("Sending submit score web request...")
+        r = requests.post(
+            f'{HOST}/submitScore?score_type={SCORE_TYPE}', data=f.read(), headers=headers)
+        log("Response:")
+        log(r.text)
 
 
 def readstats():
@@ -366,8 +368,8 @@ if __name__ == "__main__":
     print("\nLoading...")
     time.sleep(5)
 
-    # Main loop
     ingame = "true"
+    # Main loop
     song_name = ""
     song_pack = ""
     top3 = getTop3Score(readstats().get(
@@ -414,7 +416,7 @@ if __name__ == "__main__":
             log(str(e))
             log(traceback.format_exc())
             print(e, file=sys.stderr)
-            
+
             # Reset script state on error
             ingame = "true"
             song_name = ""
