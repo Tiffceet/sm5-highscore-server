@@ -65,7 +65,7 @@ class CustomParser:
 # Command line arguments
 PROFILE_NAME = ""
 SCORE_TYPE = "controller"
-HOST = "http://looz.servehttp.com:3001"
+HOST = "https://sm.looz.online"
 
 if len(sys.argv) >= 2:
     PROFILE_NAME = sys.argv[1]
