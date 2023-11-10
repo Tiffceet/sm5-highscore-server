@@ -85,12 +85,12 @@ FC_TABLE_COLOR = [Fore.CYAN, Fore.GREEN, Fore.YELLOW, Fore.LIGHTWHITE_EX]
 
 
 def log(message):
-  if not debug_mode:
-      return
-  with open("logs.txt", "a") as f:
-      f.write(f'[{datetime.now()}] ')
-      f.write(message)
-      f.write("\n")
+    if not debug_mode:
+        return
+    with open("logs.txt", "a", encoding='utf-8') as f:
+        f.write(f'[{datetime.now()}] ')
+        f.write(message)
+        f.write("\n")
 
 
 def extractSpeedModifier(modifiers_string):
@@ -171,7 +171,17 @@ def getScoresByName(song_name):
         'r_song': song_name
     }
 
+    log("Sending web request...")
+    log("Payload:")
+    log(str({
+        'r_song': song_name,
+        url: url
+    }))
+
     r = requests.get(url=url, params=params)
+
+    log("Response:")
+    log(r.text)
 
     data = r.json()
     return data
@@ -334,7 +344,8 @@ def submitScore():
         print(f"Cannot get PROFILE_NAME ({PROFILE_NAME})")
         return
 
-    log("Running os.system: " + f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
+    log("Running os.system: " +
+        f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
     os.system(f'cd {stat_path} && curl -H "Content-Type: text/plain; charset=UTF-8" --data-binary "@Stats.xml" {HOST}/submitScore?score_type={SCORE_TYPE}')
     log("Done running os.system")
     pass
