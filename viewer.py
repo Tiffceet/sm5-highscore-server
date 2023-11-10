@@ -414,4 +414,9 @@ if __name__ == "__main__":
             log(str(e))
             log(traceback.format_exc())
             print(e, file=sys.stderr)
+            
+            # Reset script state on error
+            ingame = "true"
+            song_name = ""
+            song_pack = ""
             continue
