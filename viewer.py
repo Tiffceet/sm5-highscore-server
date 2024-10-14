@@ -348,7 +348,7 @@ def submitScore():
         headers = {'Content-Type': 'text/plain; charset=UTF-8'}
         log("Sending submit score web request...")
         r = requests.post(
-            f'{HOST}/submitScore?score_type={SCORE_TYPE}', data=f.read(), headers=headers)
+            f'{HOST}/submitScore?score_type={SCORE_TYPE}', data=f.read().encode(), headers=headers)
         log("Response:")
         log(r.text)
 
