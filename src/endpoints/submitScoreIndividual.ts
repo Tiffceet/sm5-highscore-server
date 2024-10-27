@@ -1,9 +1,12 @@
 import { dirname } from "../globals.js";
-
+import * as fs from "node:fs";
+import * as path from "path";
+import { Request, Response } from "express";
+import { PlayerProfile } from "../interface/PlayerProfile.js";
 const submitScoreIndividual = {
   method: "post",
   endpoint: "/submitScoreIndividual",
-  handler: function (req, res) {
+  handler: function (req: Request, res: Response) {
     let {
       player,
       pack,
@@ -50,10 +53,12 @@ const submitScoreIndividual = {
       return;
     }
 
-    let score_obj = {};
+    let score_obj: Partial<PlayerProfile> = {};
     try {
       score_obj = JSON.parse(
-        fs.readFileSync(`${dirname}scores${path.sep}${player}.json`)
+        fs.readFileSync(`${dirname}scores${path.sep}${player}.json`, {
+          encoding: "utf-8",
+        })
       );
     } catch (e) {
       // This is a new player
@@ -63,7 +68,7 @@ const submitScoreIndividual = {
 
     let player_key = Object.keys(score_obj)[0];
     let scores_arr = score_obj[player_key];
-    let found_song = [false, -1];
+    let found_song: [boolean, number] = [false, -1];
     for (let i = 0; i < scores_arr.length; i++) {
       const x = scores_arr[i];
       if (x.pack === pack && x.song === song) {
@@ -115,7 +120,7 @@ const submitScoreIndividual = {
     }
 
     let diffs = score_obj[player_key][found_song[1]].diffs;
-    let found_diff = [false, -1];
+    let found_diff: [boolean, number] = [false, -1];
     for (let i = 0; i < diffs.length; i++) {
       const x = diffs[i];
       if (x.Difficulty === Difficulty) {
@@ -202,7 +207,7 @@ const submitScoreIndividual = {
   },
 };
 
-const verifyIndividualScoreBody = (body) => {
+const verifyIndividualScoreBody = (body: Record<string, any>) => {
   let {
     player,
     pack,

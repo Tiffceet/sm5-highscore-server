@@ -1,0 +1,1 @@
+export type FCType = "NONE" | "MFC" | "PFC" | "GRFC" | "GOFC";

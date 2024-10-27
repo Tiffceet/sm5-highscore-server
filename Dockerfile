@@ -1,15 +1,15 @@
-# syntax=docker/dockerfile:1
+ARG BUN_VERSION=1.1.33
+FROM oven/bun:${BUN_VERSION}
 
-FROM node:18.14.0
 ENV NODE_ENV=production
 WORKDIR /app
 
-COPY ["package.json", "package-lock.json*", "./"]
+COPY package.json bun.lockb ./
 
 RUN touch alias.json
 
-RUN npm ci
+RUN bun install
 
 COPY . .
 
-CMD [ "npm", "start"]
+CMD [ "bun", "start" ]

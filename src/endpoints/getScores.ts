@@ -1,16 +1,30 @@
-import { dirname, DIFF_MAP, TIER_MAP, FC_MAP } from "../globals.js";
+import { dirname, DIFF_MAP, TIER_MAP, FC_MAP } from "../globals";
 import * as fs from "fs";
 import path from "path";
+import { Request, Response } from "express";
+import { PlayerProfile, PlayerScore } from "../interface/PlayerProfile";
+import { ScoreType } from "../interface/types/ScoreType";
+import { PlayerScoreRecord } from "../interface/PlayerScoreRecord";
+import { PackAliases } from "../interface/types/PackAliases";
 const getScores = {
   method: "get",
   endpoint: "/getScores",
-  handler: async function (req, res) {
+  handler: async function (req: Request, res: Response) {
     let { r_song, r_pack, r_diff, sort, score_type } = req.query;
-    let scores = {};
 
-    let aliases = {};
+    /**
+     * {
+     *   controller: { Looz: [...], PlayerB: [...] }
+     *   pad: { PadLooz: [...] }
+     * }
+     */
+    let scores: Partial<Record<ScoreType, Record<string, PlayerScore[]>>> = {};
+
+    let aliases: PackAliases = {};
     try {
-      aliases = JSON.parse(fs.readFileSync(dirname + "alias.json"));
+      aliases = JSON.parse(
+        fs.readFileSync(dirname + "alias.json", { encoding: "utf-8" })
+      );
     } catch (e) {}
 
     fs.readdir(`${dirname}scores`, function (err, filenames) {
@@ -20,17 +34,16 @@ const getScores = {
       }
       for (let i = 0; i < filenames.length; i++) {
         const filename = filenames[i];
-        let content = fs.readFileSync(
-          dirname + "scores" + path.sep + filename,
-          "utf-8"
+        let content: PlayerProfile = JSON.parse(
+          fs.readFileSync(dirname + "scores" + path.sep + filename, "utf-8")
         );
-        content = JSON.parse(content);
         if (score_type) {
           if (content.score_type != score_type) {
             continue;
           }
         }
-        let new_score_obj = {};
+        
+        let new_score_obj: Record<string, PlayerScore[]> = {};
         new_score_obj[`${content.username}`] = content.scores;
         let content_score_type = content.score_type;
         if (!scores[content_score_type]) {
@@ -43,7 +56,7 @@ const getScores = {
       }
       let data_arr = convertScoreIntoDataRow(scores, aliases, req.query);
       if (sort === "desc") {
-        data_arr.sort((a, b) => {
+        data_arr.sort((a: PlayerScoreRecord, b: PlayerScoreRecord) => {
           if (a.Score < b.Score) {
             return 1;
           }
@@ -53,10 +66,12 @@ const getScores = {
           if (a.Score == b.Score) {
             return 0;
           }
+
+          return 0;
         });
       }
       if (sort === "asc") {
-        data_arr.sort((a, b) => {
+        data_arr.sort((a: PlayerScoreRecord, b: PlayerScoreRecord) => {
           if (a.Score > b.Score) {
             return 1;
           }
@@ -66,6 +81,7 @@ const getScores = {
           if (a.Score == b.Score) {
             return 0;
           }
+          return 0;
         });
       }
       res.json(data_arr);
@@ -74,16 +90,20 @@ const getScores = {
 };
 
 const convertScoreIntoDataRow = (
-  scores,
-  packAlias,
-  { r_song, r_pack, r_diff }
-) => {
-  let datarows = [];
+  scores: Partial<Record<ScoreType, Record<string, PlayerScore[]>>>,
+  packAlias: Record<string, Record<string, string>>,
+  {
+    r_song,
+    r_pack,
+    r_diff,
+  }: { r_song?: string; r_pack?: string; r_diff?: string }
+): PlayerScoreRecord[] => {
+  let datarows: PlayerScoreRecord[] = [];
 
   let scores_by_type = Object.entries(scores);
   scores_by_type.forEach(([score_type, scores]) => {
-    scores = Object.entries(scores);
-    scores.forEach(([player, songs]) => {
+    let scoresArray = Object.entries(scores);
+    scoresArray.forEach(([player, songs]) => {
       songs.forEach((song) => {
         song.diffs.forEach((diff) => {
           // Remap pack, diff and grade
@@ -91,14 +111,8 @@ const convertScoreIntoDataRow = (
           if (packAlias[player] && packAlias[player][song.pack]) {
             cur_pack = packAlias[player][song.pack];
           }
-          let cur_diff =
-            typeof DIFF_MAP[diff.Difficulty] === "undefined"
-              ? diff.Difficulty
-              : DIFF_MAP[diff.Difficulty];
-          let cur_grade =
-            typeof TIER_MAP[diff.Grade] === "undefined"
-              ? diff.Grade
-              : TIER_MAP[diff.Grade];
+          let cur_diff = parseDiffIntoDDRFormat(diff.Difficulty);
+          let cur_grade = parseGradeIntoDDRFormat(diff.Grade);
           if (r_song && song.song !== r_song) {
             return;
           }
@@ -141,6 +155,21 @@ const convertScoreIntoDataRow = (
     });
   });
   return datarows;
+};
+
+const parseDiffIntoDDRFormat = (diff: string) => {
+  if (Object.keys(DIFF_MAP).includes(diff)) {
+    return DIFF_MAP[diff as keyof typeof DIFF_MAP];
+  }
+
+  return diff;
+};
+const parseGradeIntoDDRFormat = (grade: string) => {
+  if (Object.keys(TIER_MAP).includes(grade)) {
+    return TIER_MAP[grade as keyof typeof TIER_MAP];
+  }
+
+  return grade;
 };
 
 export { getScores };
