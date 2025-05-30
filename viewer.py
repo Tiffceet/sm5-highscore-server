@@ -344,7 +344,7 @@ def submitScore():
         print(f"Cannot get PROFILE_NAME ({PROFILE_NAME})")
         return
 
-    with open(os.path.join(stat_path, 'Stats.xml')) as f:
+    with open(os.path.join(stat_path, 'Stats.xml'), errors="ignore") as f:
         headers = {'Content-Type': 'text/plain; charset=UTF-8'}
         log("Sending submit score web request...")
         r = requests.post(
