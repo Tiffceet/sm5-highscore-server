@@ -45,7 +45,7 @@ const getScoresWithMeter = {
         }
 
         let songIndexes: UploadSongIndexesRequestBody | undefined = undefined;
-        const songIndexFilePath = `${dirname}song_indexes${path.sep}${filename}`;
+        const songIndexFilePath = `${dirname}song_indexes${path.sep}${content.username}.json`;
 
         if (fs.existsSync(songIndexFilePath)) {
           songIndexes = JSON.parse(
