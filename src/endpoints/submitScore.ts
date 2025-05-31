@@ -59,6 +59,8 @@ const submitScore = {
       createDirectoryIfNotExists("_backup");
       fs.writeFileSync(`${dirname}_backup${path.sep}${username}.xml`, req.body);
     });
+    res.status(200);
+    res.end();
   },
 };
 
