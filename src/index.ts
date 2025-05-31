@@ -11,6 +11,7 @@ const app = express();
 app.use(bodyParser.text({ type: "text/plain", limit: "200mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "200mb" }));
 app.use(cors());
+app.use(express.json({ limit: "200mb" }));
 app.use(favicon(dirname + "favicon.ico"));
 
 app.get("/", function (req: Request, res: Response) {

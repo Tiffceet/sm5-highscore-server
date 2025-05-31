@@ -8,3 +8,4 @@ alias.json
 _backup
 _backup/**/*
 .env
+song_indexes

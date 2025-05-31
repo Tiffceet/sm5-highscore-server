@@ -4,6 +4,7 @@ export interface PlayerScoreRecord {
   SongPack: string;
   SongName: string;
   Difficulty: string;
+  Meter?: number | 0;
   Grade: string;
   Score: number;
   PercentDP: string;

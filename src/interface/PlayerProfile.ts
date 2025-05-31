@@ -5,6 +5,7 @@ import { ScoreType } from "./types/ScoreType";
 
 export interface PlayerDifficultyScore {
   Difficulty: string;
+  Meter?: number;
   DateTime: string;
   NG: number;
   Grade: Grade;
