@@ -3,7 +3,8 @@ import re
 import sys
 import json
 import requests
-
+import time
+from http.client import responses
 # Fix for UTF-8 encoding issues
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -12,6 +13,14 @@ HOST = "http://localhost:3000"
 USERNAME = "Looz"
 # Change this to your actual StepMania Songs folder
 STEPMANIA_SONGS_PATH = 'D:\\StepMania 5\\Songs'
+if len(sys.argv) >= 2:
+    HOST = sys.argv[1]
+
+if len(sys.argv) >= 3:
+    USERNAME = sys.argv[2]
+
+if len(sys.argv) >= 4:
+    STEPMANIA_SONGS_PATH = sys.argv[3]
 
 
 def parse_sm_file(sm_path):
@@ -66,7 +75,8 @@ def parse_ssc_file(sm_path):
         song_info['map_name'] = os.path.basename(os.path.dirname(sm_path))
 
         # Get difficulties
-        notedata_blocks = re.split(r'(?=#NOTEDATA:;)', data, flags=re.IGNORECASE)
+        notedata_blocks = re.split(
+            r'(?=#NOTEDATA:;)', data, flags=re.IGNORECASE)
         for block in notedata_blocks:
             diff_match = re.search(r'#DIFFICULTY:(.*?);', block, re.IGNORECASE)
             meter_match = re.search(r'#METER:(.*?);', block, re.IGNORECASE)
@@ -132,11 +142,19 @@ def main():
             "Content-Type": "application/json"
         })
 
+    print(f"{r.status_code} {responses[r.status_code]}")
     print(r.content)
 
-    with open("index.json", "w", encoding="utf-8") as f:
-        json.dump(all_songs_info, f, ensure_ascii=False, indent=2)
+    # with open("index.json", "w", encoding="utf-8") as f:
+    #     json.dump(all_songs_info, f, ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":
+    print("HOST: " + HOST)
+    print("USERNAME: " + USERNAME)
+    print("STEPMANIA_SONGS_PATH: " + STEPMANIA_SONGS_PATH)
+    print("\nLoading...")
+    sys.stdout.flush()
+    time.sleep(5)
+
     main()
